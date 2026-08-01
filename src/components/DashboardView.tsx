@@ -61,14 +61,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <img
                 src="/screencraft-logo.png"
                 alt="ScreenCraft AI Logo"
-                className="w-10 h-10 object-contain rounded-xl bg-slate-900 border border-slate-800 p-1 shadow-lg shadow-indigo-500/10"
+                className="w-10 h-10 object-contain rounded-xl bg-slate-900 border border-slate-800 p-1.5 shadow-md"
               />
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-                ScreenCraft <span className="text-indigo-400">AI</span>
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+                  ScreenCraft <span className="text-indigo-400">AI</span>
+                </h1>
+                <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                  {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
+                </span>
+              </div>
             </div>
             <p className="text-xs md:text-sm text-slate-400 max-w-xl">
-              Convert mobile app screenshots into interactive app showcase websites & case studies.
+              Enterprise Showcase & Portfolio Generator for Flutter & Mobile Applications.
             </p>
           </div>
 
@@ -76,7 +81,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onCreateNewProject}
-              className="px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition hover:-translate-y-0.5 flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md transition flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               <span>Add Flutter App</span>
