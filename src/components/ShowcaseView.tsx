@@ -28,6 +28,7 @@ interface ShowcaseViewProps {
   project: Project;
   viewport?: DevicePreviewViewport;
   isStandalone?: boolean;
+  isFromPortfolio?: boolean;
   onBackToDashboard?: () => void;
 }
 
@@ -61,6 +62,7 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
   project,
   viewport = 'desktop',
   isStandalone = false,
+  isFromPortfolio = false,
   onBackToDashboard,
 }) => {
   const [activeScreenIndex, setActiveScreenIndex] = useState(0);
@@ -69,6 +71,7 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
   const screens = project.screens || [];
   const showcase = project.showcase || {};
   const links = project.links || {};
+  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || '#';
 
   // Viewport container sizing logic
   let viewportWidthClass = 'w-full max-w-7xl';
@@ -85,15 +88,25 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
         {/* Top Navbar */}
         <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/90 border-b border-slate-800/80 px-6 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            {onBackToDashboard && (
-              <button
-                onClick={onBackToDashboard}
-                className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 shadow-md transition hover:-translate-x-0.5 mr-2 shrink-0"
-                title="Return to Dashboard"
+            {isFromPortfolio ? (
+              <a
+                href={portfolioUrl}
+                className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/40 shadow-lg shadow-indigo-600/20 transition hover:-translate-x-0.5 mr-2 shrink-0"
               >
-                <ArrowLeft className="w-4 h-4 text-indigo-400" />
-                <span>Back to Dashboard</span>
-              </button>
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Portfolio</span>
+              </a>
+            ) : (
+              onBackToDashboard && (
+                <button
+                  onClick={onBackToDashboard}
+                  className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 shadow-md transition hover:-translate-x-0.5 mr-2 shrink-0"
+                  title="Return to Dashboard"
+                >
+                  <ArrowLeft className="w-4 h-4 text-indigo-400" />
+                  <span>Back to Dashboard</span>
+                </button>
+              )
             )}
 
             <img

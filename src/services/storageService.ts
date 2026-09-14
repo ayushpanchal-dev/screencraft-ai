@@ -7,38 +7,22 @@ const OLD_STORAGE_KEY = 'screencraft_ai_projects_v1';
 export class StorageService {
   static getProjects(): Project[] {
     try {
-      let raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        // Migration check from old storage key if present, stripping sample seed items
-        const oldRaw = localStorage.getItem(OLD_STORAGE_KEY);
-        if (oldRaw) {
-          try {
-            const oldParsed = JSON.parse(oldRaw);
-            if (Array.isArray(oldParsed)) {
-              const seedIds = ['proj-pulsefit-01', 'proj-novapay-02', 'proj-health-03'];
-              const filteredUserProjects = oldParsed.filter((p: Project) => !seedIds.includes(p.id));
-              this.saveAllProjects(filteredUserProjects);
-              return filteredUserProjects;
-            }
-          } catch (err) {
-            console.error('Migration error:', err);
-          }
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed;
         }
-        // Default to clean empty list
-        this.saveAllProjects([]);
-        return [];
-      }
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        const seedIds = ['proj-pulsefit-01', 'proj-novapay-02', 'proj-health-03'];
-        const userOnly = parsed.filter((p: Project) => !seedIds.includes(p.id));
-        return userOnly;
       }
       return [];
     } catch (e) {
       console.error('Failed to load projects from storage:', e);
       return [];
     }
+  }
+
+  static getUserOnlyProjects(): Project[] {
+    return this.getProjects();
   }
 
   static saveAllProjects(projects: Project[]): void {
@@ -49,9 +33,31 @@ export class StorageService {
     }
   }
 
-  static getProjectById(id: string): Project | undefined {
+  static getProjectByIdOrSlug(idOrSlug: string): Project | undefined {
+    if (!idOrSlug) return undefined;
+    const norm = idOrSlug.trim().toLowerCase();
+    const cleanNorm = norm.replace(/[^a-z0-9]/g, '');
+
     const projects = this.getProjects();
-    return projects.find((p) => p.id === id);
+    return projects.find((p) => {
+      if (p.id.toLowerCase() === norm) return true;
+      if (p.slug && p.slug.toLowerCase() === norm) return true;
+      
+      const pIdClean = p.id.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (pIdClean === cleanNorm) return true;
+
+      const pSlugClean = p.slug?.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (pSlugClean === cleanNorm) return true;
+
+      const pNameClean = p.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (pNameClean === cleanNorm) return true;
+
+      return false;
+    });
+  }
+
+  static getProjectById(id: string): Project | undefined {
+    return this.getProjectByIdOrSlug(id);
   }
 
   static saveProject(project: Project): void {

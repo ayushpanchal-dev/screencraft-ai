@@ -173,11 +173,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         style={{ backgroundColor: primaryColor }}
                       />
 
-                      {heroScreen ? (
+                      {project.type === 'professional' ? (
+                        <div className="w-28 h-36 rounded-2xl bg-blue-950/40 border border-blue-500/30 flex flex-col items-center justify-center text-blue-400 p-3 text-center space-y-1">
+                          <FileCode className="w-8 h-8 opacity-80" />
+                          <span className="text-[10px] font-bold">Case Study</span>
+                        </div>
+                      ) : project.type === 'private' ? (
+                        <div className="w-28 h-36 rounded-2xl bg-amber-950/40 border border-amber-500/30 flex flex-col items-center justify-center text-amber-400 p-3 text-center space-y-1">
+                          <Smartphone className="w-8 h-8 opacity-80" />
+                          <span className="text-[10px] font-bold">Restricted</span>
+                        </div>
+                      ) : heroScreen ? (
                         <div className="relative w-28 h-44 rounded-xl overflow-hidden border border-slate-700 shadow-2xl transition group-hover:scale-105 duration-300">
                           <img
                             src={heroScreen.imageUrl}
                             alt={project.name}
+                            loading="lazy"
                             className="w-full h-full object-cover object-top"
                           />
                         </div>
@@ -193,11 +204,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-900/90 text-slate-300 border border-slate-800 shadow">
                           {project.category}
                         </span>
+                        {project.type === 'professional' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                            Case Study
+                          </span>
+                        )}
+                        {project.type === 'private' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Private
+                          </span>
+                        )}
                       </div>
 
                       <div className="absolute top-3 right-3">
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                          {screenCount} {screenCount === 1 ? 'Screen' : 'Screens'}
+                          {project.type === 'professional' ? 'Case Study' : project.type === 'private' ? 'Confidential' : `${screenCount} ${screenCount === 1 ? 'Screen' : 'Screens'}`}
                         </span>
                       </div>
                     </div>
@@ -207,7 +228,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <h3
-                            onClick={() => onSelectProject(project.id)}
+                            onClick={() => onQuickPreview(project.id)}
                             className="text-lg font-bold text-white hover:text-indigo-400 cursor-pointer transition tracking-tight"
                           >
                             {project.name}
@@ -248,7 +269,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           className="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
-                          <span>Preview Showcase</span>
+                          <span>
+                            {project.type === 'professional' ? 'View Case Study' : project.type === 'private' ? 'View Confidential' : 'Preview Showcase'}
+                          </span>
                         </button>
 
                         <button

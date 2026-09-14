@@ -73,6 +73,8 @@ export interface Project {
   screens: AppScreen[];
   deviceConfig: DeviceConfig;
   showcase: ShowcaseContent;
+  type?: 'public' | 'professional' | 'private';
+  slug?: string;
   createdAt: string;
   updatedAt: string;
   isFavorite?: boolean;
