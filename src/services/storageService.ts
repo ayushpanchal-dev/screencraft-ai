@@ -1,5 +1,6 @@
 import { Project, AppScreen } from '../types';
 import { SEED_PROJECTS } from '../data/seedProjects';
+import { generateSlug, getUniqueSlug } from '../utils/slugUtils';
 
 const STORAGE_KEY = 'screencraft_ai_portfolio_user_projects_v2';
 const OLD_STORAGE_KEY = 'screencraft_ai_projects_v1';
@@ -7,14 +8,33 @@ const OLD_STORAGE_KEY = 'screencraft_ai_projects_v1';
 export class StorageService {
   static getProjects(): Project[] {
     try {
+      let projects: Project[] = [];
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          return parsed;
+          projects = parsed;
         }
       }
-      return [];
+
+      // Migration: Ensure every project has a valid slug
+      let needsSave = false;
+      projects = projects.map((p) => {
+        if (!p.slug || p.slug.trim() === '') {
+          needsSave = true;
+          return {
+            ...p,
+            slug: getUniqueSlug(p.name, projects, p.id),
+          };
+        }
+        return p;
+      });
+
+      if (needsSave) {
+        this.saveAllProjects(projects);
+      }
+
+      return projects;
     } catch (e) {
       console.error('Failed to load projects from storage:', e);
       return [];
@@ -39,10 +59,25 @@ export class StorageService {
     const cleanNorm = norm.replace(/[^a-z0-9]/g, '');
 
     const projects = this.getProjects();
+    
+    // 1. Exact ID match
+    let found = projects.find((p) => p.id === idOrSlug);
+    if (found) return found;
+
+    // 2. Exact slug match
+    found = projects.find((p) => p.slug === idOrSlug);
+    if (found) return found;
+
+    // 3. Case-insensitive ID or slug match
+    found = projects.find(
+      (p) =>
+        p.id.toLowerCase() === norm ||
+        (p.slug && p.slug.toLowerCase() === norm)
+    );
+    if (found) return found;
+
+    // 4. Normalized alphanumeric match
     return projects.find((p) => {
-      if (p.id.toLowerCase() === norm) return true;
-      if (p.slug && p.slug.toLowerCase() === norm) return true;
-      
       const pIdClean = p.id.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (pIdClean === cleanNorm) return true;
 
@@ -63,8 +98,14 @@ export class StorageService {
   static saveProject(project: Project): void {
     const projects = this.getProjects();
     const index = projects.findIndex((p) => p.id === project.id);
+    
+    const validatedSlug = project.slug && project.slug.trim() !== ''
+      ? generateSlug(project.slug)
+      : getUniqueSlug(project.name, projects, project.id);
+
     const updatedProject: Project = {
       ...project,
+      slug: validatedSlug,
       updatedAt: new Date().toISOString(),
     };
 
@@ -82,10 +123,17 @@ export class StorageService {
   }
 
   static createDraftProject(initialData?: Partial<Project>): Project {
+    const existingProjects = this.getProjects();
     const newId = 'proj-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
+    const initialName = initialData?.name || 'My Flutter App';
+    const initialSlug = initialData?.slug
+      ? generateSlug(initialData.slug)
+      : getUniqueSlug(initialName, existingProjects, newId);
+
     return {
       id: newId,
-      name: initialData?.name || 'My Flutter App',
+      slug: initialSlug,
+      name: initialName,
       tagline: initialData?.tagline || 'Interactive Mobile Showcase & Portfolio Case Study',
       description: initialData?.description || 'A high-performance mobile application built with Flutter & Material 3.',
       category: initialData?.category || 'Productivity',

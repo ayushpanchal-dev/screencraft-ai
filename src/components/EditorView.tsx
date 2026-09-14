@@ -3,6 +3,7 @@ import { Project, AppScreen, EditorTab, DevicePreviewViewport, DeviceConfig, Fea
 import { DeviceFrame } from './DeviceFrame';
 import { ShowcaseView } from './ShowcaseView';
 import { ExportService } from '../services/exportService';
+import { generateSlug } from '../utils/slugUtils';
 import confetti from 'canvas-confetti';
 import {
   ArrowLeft,
@@ -438,14 +439,22 @@ export const EditorView: React.FC<EditorViewProps> = ({
               </div>
 
               <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Name */}
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-300">Project Name *</label>
                     <input
                       type="text"
                       value={currentProject.name}
-                      onChange={(e) => handleProjectFieldChange('name', e.target.value)}
+                      onChange={(e) => {
+                        const newName = e.target.value;
+                        const updated = {
+                          ...currentProject,
+                          name: newName,
+                          slug: currentProject.slug ? currentProject.slug : generateSlug(newName),
+                        };
+                        updateCurrentProject(updated);
+                      }}
                       className="w-full bg-slate-950 text-slate-200 text-xs md:text-sm px-4 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
@@ -467,6 +476,57 @@ export const EditorView: React.FC<EditorViewProps> = ({
                       <option value="AI Tools">AI Tools</option>
                       <option value="Utilities">Utilities</option>
                     </select>
+                  </div>
+
+                  {/* Project Type */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300">Showcase Type</label>
+                    <select
+                      value={currentProject.type || 'public'}
+                      onChange={(e) => handleProjectFieldChange('type', e.target.value)}
+                      className="w-full bg-slate-950 text-slate-200 text-xs md:text-sm px-4 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="public">Public (Full Screenshots & Demo)</option>
+                      <option value="professional">Professional (Text Case Study)</option>
+                      <option value="private">Private (Restricted NDA Notice)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* URL Slug (Stable Public Identifier) */}
+                <div className="space-y-2 p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="text-xs font-semibold text-indigo-400 flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>URL Slug (Stable Portfolio Identifier)</span>
+                    </label>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      https://screencraft-ai.vercel.app/project/{currentProject.slug || generateSlug(currentProject.name)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500 font-mono select-none px-3 py-2 bg-slate-900 rounded-lg border border-slate-800">
+                      /project/
+                    </span>
+                    <input
+                      type="text"
+                      value={currentProject.slug || generateSlug(currentProject.name)}
+                      onChange={(e) => handleProjectFieldChange('slug', generateSlug(e.target.value))}
+                      placeholder="suraj-approval"
+                      className="flex-1 bg-slate-900 text-slate-200 font-mono text-xs md:text-sm px-3.5 py-2 rounded-lg border border-slate-800 focus:outline-none focus:border-indigo-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url = `${window.location.origin}/project/${currentProject.slug || generateSlug(currentProject.name)}`;
+                        navigator.clipboard.writeText(url);
+                        alert('Portfolio URL copied to clipboard:\n' + url);
+                      }}
+                      className="px-3.5 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-semibold transition flex items-center gap-1.5 shrink-0"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy URL</span>
+                    </button>
                   </div>
                 </div>
 

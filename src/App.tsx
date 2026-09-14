@@ -64,7 +64,14 @@ export default function App() {
     viewType = 'editor';
     targetIdOrSlug = pathParts[1] || null;
   } else {
-    viewType = 'not-found';
+    // Check if direct root path (e.g. /suraj-approval) matches a project slug or ID
+    const directMatch = StorageService.getProjectByIdOrSlug(pathParts[0]);
+    if (directMatch) {
+      viewType = 'project';
+      targetIdOrSlug = pathParts[0];
+    } else {
+      viewType = 'not-found';
+    }
   }
 
   // Lookup target project if ID/slug is in URL
