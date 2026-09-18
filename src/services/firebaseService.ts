@@ -11,7 +11,8 @@ import {
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, isFirebaseConfigured } from './firebase';
+import { StorageService } from './storageService';
 import { Project, AppScreen } from '../types';
 import { generateSlug, getUniqueSlug } from '../utils/slugUtils';
 
@@ -63,9 +64,13 @@ function mapDocToProject(docSnap: any): Project {
 
 export class FirebaseService {
   /**
-   * Fetch all projects from Cloud Firestore.
+   * Fetch all projects from Cloud Firestore with local storage fallback.
    */
   static async getProjects(): Promise<Project[]> {
+    if (!isFirebaseConfigured) {
+      return StorageService.getProjects();
+    }
+
     try {
       const colRef = collection(db, PROJECTS_COLLECTION);
       const q = query(colRef, orderBy('createdAt', 'desc'));
@@ -76,15 +81,19 @@ export class FirebaseService {
       });
       return projects;
     } catch (err) {
-      console.error('Error fetching projects from Firestore:', err);
-      // Fallback query without orderBy if index is building
-      const colRef = collection(db, PROJECTS_COLLECTION);
-      const querySnapshot = await getDocs(colRef);
-      const projects: Project[] = [];
-      querySnapshot.forEach((docSnap) => {
-        projects.push(mapDocToProject(docSnap));
-      });
-      return projects;
+      console.warn('Error fetching projects from Firestore, falling back to local data:', err);
+      try {
+        const colRef = collection(db, PROJECTS_COLLECTION);
+        const querySnapshot = await getDocs(colRef);
+        const projects: Project[] = [];
+        querySnapshot.forEach((docSnap) => {
+          projects.push(mapDocToProject(docSnap));
+        });
+        return projects;
+      } catch (fallbackErr) {
+        console.warn('Firestore fallback query failed:', fallbackErr);
+        return StorageService.getProjects();
+      }
     }
   }
 
@@ -94,6 +103,10 @@ export class FirebaseService {
   static async getProjectBySlug(idOrSlug: string): Promise<Project | undefined> {
     if (!idOrSlug) return undefined;
     const cleanIdOrSlug = idOrSlug.trim().toLowerCase();
+
+    if (!isFirebaseConfigured) {
+      return StorageService.getProjectByIdOrSlug(idOrSlug);
+    }
 
     try {
       const colRef = collection(db, PROJECTS_COLLECTION);
@@ -115,7 +128,7 @@ export class FirebaseService {
       // 3. Fallback: fetch all projects and match normalized ID or slug
       const allProjects = await this.getProjects();
       const norm = cleanIdOrSlug.replace(/[^a-z0-9]/g, '');
-      return allProjects.find((p) => {
+      const match = allProjects.find((p) => {
         if (p.id.toLowerCase() === cleanIdOrSlug) return true;
         if (p.slug && p.slug.toLowerCase() === cleanIdOrSlug) return true;
         const pSlugNorm = p.slug?.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -126,9 +139,12 @@ export class FirebaseService {
         if (pNameNorm === norm) return true;
         return false;
       });
+
+      if (match) return match;
+      return StorageService.getProjectByIdOrSlug(idOrSlug);
     } catch (err) {
-      console.error('Error looking up project by slug in Firestore:', err);
-      return undefined;
+      console.warn('Error looking up project by slug in Firestore, using local fallback:', err);
+      return StorageService.getProjectByIdOrSlug(idOrSlug);
     }
   }
 
