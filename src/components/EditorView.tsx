@@ -4,6 +4,8 @@ import { DeviceFrame } from './DeviceFrame';
 import { ShowcaseView } from './ShowcaseView';
 import { ExportService } from '../services/exportService';
 import { generateSlug } from '../utils/slugUtils';
+import { FirebaseService } from '../services/firebaseService';
+import { getRenderableImageUrl, getScreenImageUrl, validateImageUrl } from '../utils/imageUrlUtils';
 import confetti from 'canvas-confetti';
 import {
   ArrowLeft,
@@ -32,12 +34,16 @@ import {
   Copy,
   RefreshCw,
   X,
+  AlertTriangle,
+  Link,
+  Edit3,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface EditorViewProps {
   project: Project;
   isNewProject?: boolean;
-  onSaveProject: (updated: Project) => void;
+  onSaveProject: (updated: Project) => Promise<void> | void;
   onBackToDashboard: () => void;
 }
 
@@ -55,7 +61,8 @@ export const EditorView: React.FC<EditorViewProps> = ({
   const [activeViewport, setActiveViewport] = useState<DevicePreviewViewport>('desktop');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiAnalysisScreenId, setAiAnalysisScreenId] = useState<string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<string>(isNewProject ? 'Unsaved draft' : 'Saved to local storage');
+  const [saveStatus, setSaveStatus] = useState<string>(isNewProject ? 'Unsaved draft' : 'Saved to Cloud Firestore');
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   const updateCurrentProject = (updated: Project) => {
     setCurrentProject(updated);
@@ -70,11 +77,18 @@ export const EditorView: React.FC<EditorViewProps> = ({
     updateCurrentProject(updated);
   };
 
-  const handleSave = () => {
-    onSaveProject(currentProject);
-    setIsDirty(false);
-    setSaveStatus('Saved to local storage');
-    confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+  const handleSave = async () => {
+    setSaveStatus('Saving to Cloud Firestore...');
+    try {
+      await onSaveProject(currentProject);
+      setIsDirty(false);
+      setSaveStatus('Saved to Cloud Firestore');
+      confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+    } catch (err: any) {
+      console.error('Error saving project to Firestore:', err);
+      setSaveStatus('Error saving changes');
+      alert('Failed to save to Firestore: ' + (err.message || 'Unknown error'));
+    }
   };
 
   const handleBackClick = () => {
@@ -138,43 +152,75 @@ export const EditorView: React.FC<EditorViewProps> = ({
     handleShowcaseFieldChange('features', updatedFeatures);
   };
 
-  // Multiple File / Image Upload Handler
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const [screenFormUrl, setScreenFormUrl] = useState<string>('');
+  const [screenFormTitle, setScreenFormTitle] = useState<string>('');
+  const [screenFormDescription, setScreenFormDescription] = useState<string>('');
+  const [editingScreenId, setEditingScreenId] = useState<string | null>(null);
+  const [screenUrlError, setScreenUrlError] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<boolean>(false);
 
-    const newScreens: AppScreen[] = [];
-    let processed = 0;
+  const handleAddOrUpdateScreen = () => {
+    const validation = validateImageUrl(screenFormUrl);
+    if (!validation.isValid) {
+      setScreenUrlError(validation.message || 'Invalid image URL');
+      return;
+    }
+    setScreenUrlError(null);
 
-    Array.from(files).forEach((file: File, idx: number) => {
-      // Basic image size validation (limit 10MB per screen image)
-      if (file.size > 10 * 1024 * 1024) {
-        alert(`File ${file.name} exceeds 10MB size limit.`);
-        return;
-      }
+    const renderableUrl = getRenderableImageUrl(screenFormUrl);
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        if (result) {
-          const screenId = 'scr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
-          newScreens.push({
-            id: screenId,
-            title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
-            description: 'Uploaded mobile screen ready for showcase.',
-            imageUrl: result,
-            order: (currentProject.screens ? currentProject.screens.length : 0) + idx,
-            category: 'UI View',
-          });
+    if (editingScreenId) {
+      const updatedScreens = (currentProject.screens || []).map((s) => {
+        if (s.id === editingScreenId) {
+          return {
+            ...s,
+            imageUrl: renderableUrl,
+            sourceUrl: screenFormUrl.trim(),
+            title: screenFormTitle.trim() || s.title || 'App Screen',
+            description: screenFormDescription.trim(),
+          };
         }
-        processed++;
-        if (processed === files.length) {
-          const updatedScreens = [...(currentProject.screens || []), ...newScreens];
-          updateCurrentProject({ ...currentProject, screens: updatedScreens });
-        }
+        return s;
+      });
+      updateCurrentProject({ ...currentProject, screens: updatedScreens });
+      setEditingScreenId(null);
+    } else {
+      const newScreenId = 'scr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+      const newScreen: AppScreen = {
+        id: newScreenId,
+        title: screenFormTitle.trim() || `Screen ${(currentProject.screens?.length || 0) + 1}`,
+        description: screenFormDescription.trim(),
+        imageUrl: renderableUrl,
+        sourceUrl: screenFormUrl.trim(),
+        order: currentProject.screens ? currentProject.screens.length : 0,
+        category: 'UI View',
       };
-      reader.readAsDataURL(file);
-    });
+      const updatedScreens = [...(currentProject.screens || []), newScreen];
+      updateCurrentProject({ ...currentProject, screens: updatedScreens });
+    }
+
+    setScreenFormUrl('');
+    setScreenFormTitle('');
+    setScreenFormDescription('');
+    setPreviewError(false);
+  };
+
+  const handleStartEditScreen = (screen: AppScreen) => {
+    setEditingScreenId(screen.id);
+    setScreenFormUrl(screen.sourceUrl || screen.imageUrl || '');
+    setScreenFormTitle(screen.title || '');
+    setScreenFormDescription(screen.description || '');
+    setScreenUrlError(null);
+    setPreviewError(false);
+  };
+
+  const handleCancelEditScreen = () => {
+    setEditingScreenId(null);
+    setScreenFormUrl('');
+    setScreenFormTitle('');
+    setScreenFormDescription('');
+    setScreenUrlError(null);
+    setPreviewError(false);
   };
 
   // Reorder screen item
@@ -197,6 +243,10 @@ export const EditorView: React.FC<EditorViewProps> = ({
     const screens = (currentProject.screens || []).filter((s) => s.id !== screenId);
     screens.forEach((s, idx) => (s.order = idx));
     updateCurrentProject({ ...currentProject, screens });
+
+    if (editingScreenId === screenId) {
+      handleCancelEditScreen();
+    }
   };
 
   const handleUpdateScreenDetails = (screenId: string, field: keyof AppScreen, value: any) => {
@@ -208,11 +258,12 @@ export const EditorView: React.FC<EditorViewProps> = ({
   const handleAiAnalyzeScreen = async (screen: AppScreen) => {
     try {
       setAiAnalysisScreenId(screen.id);
+      const targetUrl = getScreenImageUrl(screen);
       const res = await fetch('/api/ai/analyze-screen', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageBase64: screen.imageUrl,
+          imageBase64: targetUrl,
           appName: currentProject.name,
           appCategory: currentProject.category,
         }),
@@ -625,138 +676,268 @@ export const EditorView: React.FC<EditorViewProps> = ({
             </div>
           )}
 
-          {/* TAB 2: SCREENSHOTS & REORDERING */}
+          {/* TAB 2: SCREENSHOTS & EXTERNAL IMAGE URL ARCHITECTURE */}
           {activeTab === 'screenshots' && (
             <div className="max-w-4xl mx-auto space-y-8">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-bold text-white">Screenshot Organizer & Upload</h3>
-                  <p className="text-xs text-slate-400">
-                    Upload mobile screenshots, reorder screens, edit captions, or analyze UI with Gemini AI.
-                  </p>
-                </div>
-
-                {/* Upload Zone Button */}
-                <label className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg transition cursor-pointer flex items-center gap-2 self-start sm:self-auto">
-                  <Upload className="w-4 h-4" />
-                  <span>Upload Screenshots</span>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
+              <div>
+                <h3 className="text-xl font-bold text-white">Project Screenshots (Google Drive & Image URLs)</h3>
+                <p className="text-xs text-slate-400">
+                  Add external image URLs or Google Drive sharing links to showcase app screens. No file uploads or Firebase Storage used.
+                </p>
               </div>
 
-              {/* Screens List */}
-              {currentProject.screens.length === 0 ? (
-                <div className="p-12 text-center bg-slate-900/40 rounded-3xl border-2 border-dashed border-slate-800 space-y-4">
-                  <Upload className="w-10 h-10 text-slate-600 mx-auto" />
-                  <h4 className="text-sm font-bold text-slate-300">No screenshots uploaded yet</h4>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Drag and drop or select multiple PNG/JPEG files from your mobile app builds.
-                  </p>
+              {/* Security & Google Drive Notice Banner */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-1.5 shadow-sm">
+                <div className="flex items-center gap-2 font-bold text-amber-400">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>Google Drive & Public Image Security Notice</span>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {currentProject.screens.map((screen, idx) => (
-                    <div
-                      key={screen.id}
-                      className="bg-slate-900/80 rounded-2xl border border-slate-800 p-5 flex flex-col md:flex-row items-start md:items-center gap-6"
+                <p className="text-[11px] text-amber-200/80 leading-relaxed">
+                  Ensure your Google Drive file permission is configured to <strong>"Anyone with the link"</strong> so public visitors can view the screenshot.
+                  Anyone with access to public image URLs may be able to view the image. Do not use publicly accessible Google Drive links for confidential or private content.
+                </p>
+              </div>
+
+              {/* Add / Edit Screen URL Card */}
+              <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-6 space-y-5 shadow-xl">
+                <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Link className="w-4 h-4 text-indigo-400" />
+                    <span>{editingScreenId ? 'Edit Project Screen URL' : 'Add New Screen via Image URL / Google Drive Link'}</span>
+                  </h4>
+                  {editingScreenId && (
+                    <button
+                      onClick={handleCancelEditScreen}
+                      className="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 transition"
                     >
-                      {/* Screen Thumbnail Frame */}
-                      <div className="relative w-28 h-44 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 shrink-0 shadow-lg">
-                        <img
-                          src={screen.imageUrl}
-                          alt={screen.title}
-                          className="w-full h-full object-cover object-top"
-                        />
-                        <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-slate-900/90 text-white text-[10px] font-bold border border-slate-800">
-                          #{idx + 1}
-                        </span>
-                      </div>
-
-                      {/* Screen Metadata Form */}
-                      <div className="flex-1 space-y-3 w-full">
-                        <div className="flex items-center justify-between gap-2">
-                          <input
-                            type="text"
-                            value={screen.title}
-                            onChange={(e) => handleUpdateScreenDetails(screen.id, 'title', e.target.value)}
-                            placeholder="Screen Title"
-                            className="bg-slate-950 text-white font-bold text-sm px-3 py-1.5 rounded-lg border border-slate-800 focus:outline-none focus:border-indigo-500 flex-1"
-                          />
-
-                          <button
-                            onClick={() => handleAiAnalyzeScreen(screen)}
-                            disabled={aiAnalysisScreenId === screen.id}
-                            className="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
-                            title="Use Gemini AI Vision to analyze screen and auto-caption features"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>
-                              {aiAnalysisScreenId === screen.id ? 'Analyzing...' : 'AI Analyze UI'}
-                            </span>
-                          </button>
-                        </div>
-
-                        <textarea
-                          rows={2}
-                          value={screen.description}
-                          onChange={(e) =>
-                            handleUpdateScreenDetails(screen.id, 'description', e.target.value)
-                          }
-                          placeholder="Short description of user actions and features on this screen..."
-                          className="w-full bg-slate-950 text-slate-300 text-xs p-3 rounded-lg border border-slate-800 focus:outline-none focus:border-indigo-500"
-                        />
-
-                        {/* Extracted Bullets if available */}
-                        {screen.aiExtractedFeatures && screen.aiExtractedFeatures.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {screen.aiExtractedFeatures.map((feat, fIdx) => (
-                              <span
-                                key={fIdx}
-                                className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-medium"
-                              >
-                                ✓ {feat}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Reorder and Delete Actions */}
-                      <div className="flex md:flex-col items-center gap-2 self-end md:self-center shrink-0 pt-2 md:pt-0 border-t md:border-t-0 md:border-l border-slate-800 md:pl-4 w-full md:w-auto justify-end">
-                        <button
-                          onClick={() => handleMoveScreen(idx, 'up')}
-                          disabled={idx === 0}
-                          className="p-2 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 border border-slate-800 transition"
-                          title="Move Up"
-                        >
-                          <MoveUp className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleMoveScreen(idx, 'down')}
-                          disabled={idx === currentProject.screens.length - 1}
-                          className="p-2 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 border border-slate-800 transition"
-                          title="Move Down"
-                        >
-                          <MoveDown className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteScreen(screen.id)}
-                          className="p-2 rounded-lg bg-slate-950 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 border border-slate-800 transition"
-                          title="Delete Screen"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                      Cancel Editing
+                    </button>
+                  )}
                 </div>
-              )}
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                  {/* Form Controls */}
+                  <div className="md:col-span-8 space-y-4">
+                    {/* Image URL Input */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                        <span>Image URL or Google Drive Link *</span>
+                        {screenFormUrl && (
+                          <span className="text-[10px] text-indigo-400 font-mono">
+                            {screenFormUrl.includes('drive.google.com') ? 'Google Drive Link Detected' : 'External Image Link'}
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        type="url"
+                        value={screenFormUrl}
+                        onChange={(e) => {
+                          setScreenFormUrl(e.target.value);
+                          setScreenUrlError(null);
+                          setPreviewError(false);
+                        }}
+                        placeholder="https://drive.google.com/file/d/.../view or https://..."
+                        className="w-full bg-slate-950 text-slate-200 text-xs md:text-sm px-4 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500 font-mono"
+                      />
+                      {screenUrlError ? (
+                        <p className="text-[11px] text-rose-400 font-medium">{screenUrlError}</p>
+                      ) : (
+                        <p className="text-[10px] text-slate-500">
+                          Supports Google Drive sharing links, Imgur, Unsplash, Cloudinary, or any HTTPS image URL.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Title */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-300">Screen Title</label>
+                      <input
+                        type="text"
+                        value={screenFormTitle}
+                        onChange={(e) => setScreenFormTitle(e.target.value)}
+                        placeholder="e.g., Home Dashboard or Suraj Approval Screen"
+                        className="w-full bg-slate-950 text-slate-200 text-xs md:text-sm px-4 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-300">Description (Optional)</label>
+                      <textarea
+                        rows={2}
+                        value={screenFormDescription}
+                        onChange={(e) => setScreenFormDescription(e.target.value)}
+                        placeholder="Brief summary of screen features and UX flow..."
+                        className="w-full bg-slate-950 text-slate-200 text-xs p-3 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    <div className="pt-2 flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleAddOrUpdateScreen}
+                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg transition flex items-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{editingScreenId ? 'Update Screen' : 'Add Screen to Project'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Live Preview Box */}
+                  <div className="md:col-span-4 flex flex-col items-center justify-center space-y-2">
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Live Preview</span>
+                    <div className="relative w-32 h-52 rounded-2xl overflow-hidden border-2 border-slate-800 bg-slate-950 flex items-center justify-center p-1 shadow-inner">
+                      {screenFormUrl.trim() !== '' ? (
+                        <>
+                          <img
+                            src={getRenderableImageUrl(screenFormUrl)}
+                            alt="Preview"
+                            className={`w-full h-full object-cover object-top rounded-xl ${previewError ? 'hidden' : 'block'}`}
+                            onError={() => setPreviewError(true)}
+                            onLoad={() => setPreviewError(false)}
+                          />
+                          {previewError && (
+                            <div className="p-3 text-center space-y-2">
+                              <AlertTriangle className="w-6 h-6 text-amber-400 mx-auto" />
+                              <p className="text-[10px] text-amber-300 leading-tight">
+                                Image could not be loaded. Check that the image URL is valid and publicly accessible.
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-center p-4 space-y-2 text-slate-600">
+                          <ImageIcon className="w-8 h-8 mx-auto opacity-40" />
+                          <p className="text-[10px]">Enter URL above to preview</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Existing Screens List */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-white flex items-center justify-between">
+                  <span>Configured Screens ({currentProject.screens.length})</span>
+                </h4>
+
+                {currentProject.screens.length === 0 ? (
+                  <div className="p-10 text-center bg-slate-900/40 rounded-3xl border-2 border-dashed border-slate-800 space-y-3">
+                    <ImageIcon className="w-10 h-10 text-slate-600 mx-auto" />
+                    <h5 className="text-sm font-bold text-slate-300">No screens added yet</h5>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Paste a Google Drive sharing link or external image URL in the form above to add screen mockups.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {currentProject.screens.map((screen, idx) => {
+                      const screenRenderUrl = getScreenImageUrl(screen);
+
+                      return (
+                        <div
+                          key={screen.id}
+                          className={`bg-slate-900/80 rounded-2xl border ${
+                            editingScreenId === screen.id ? 'border-indigo-500 bg-slate-900/95' : 'border-slate-800'
+                          } p-5 flex flex-col md:flex-row items-start md:items-center gap-6 shadow-md transition`}
+                        >
+                          {/* Screen Thumbnail */}
+                          <div className="relative w-28 h-44 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 shrink-0 shadow-lg">
+                            <img
+                              src={screenRenderUrl}
+                              alt={screen.title}
+                              className="w-full h-full object-cover object-top"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                            <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-slate-900/90 text-white text-[10px] font-bold border border-slate-800">
+                              #{idx + 1}
+                            </span>
+                          </div>
+
+                          {/* Screen Details */}
+                          <div className="flex-1 space-y-2 w-full">
+                            <div className="flex items-center justify-between gap-2">
+                              <h4 className="font-bold text-sm text-white">{screen.title}</h4>
+
+                              <button
+                                onClick={() => handleAiAnalyzeScreen(screen)}
+                                disabled={aiAnalysisScreenId === screen.id}
+                                className="px-3 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
+                                title="Use Gemini AI Vision to analyze screen and auto-caption features"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>{aiAnalysisScreenId === screen.id ? 'Analyzing...' : 'AI Analyze UI'}</span>
+                              </button>
+                            </div>
+
+                            {screen.description && (
+                              <p className="text-xs text-slate-300 line-clamp-2">{screen.description}</p>
+                            )}
+
+                            {screen.sourceUrl && (
+                              <p className="text-[10px] text-slate-500 font-mono truncate max-w-md">
+                                Source: {screen.sourceUrl}
+                              </p>
+                            )}
+
+                            {/* Extracted Bullets if available */}
+                            {screen.aiExtractedFeatures && screen.aiExtractedFeatures.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 pt-1">
+                                {screen.aiExtractedFeatures.map((feat, fIdx) => (
+                                  <span
+                                    key={fIdx}
+                                    className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-medium"
+                                  >
+                                    ✓ {feat}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex md:flex-col items-center gap-2 self-end md:self-center shrink-0 pt-2 md:pt-0 border-t md:border-t-0 md:border-l border-slate-800 md:pl-4 w-full md:w-auto justify-end">
+                            <button
+                              onClick={() => handleStartEditScreen(screen)}
+                              className="p-2 rounded-lg bg-slate-950 hover:bg-indigo-900/60 text-indigo-300 border border-slate-800 transition"
+                              title="Edit Image URL or Details"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleMoveScreen(idx, 'up')}
+                              disabled={idx === 0}
+                              className="p-2 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 border border-slate-800 transition"
+                              title="Move Up"
+                            >
+                              <MoveUp className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleMoveScreen(idx, 'down')}
+                              disabled={idx === currentProject.screens.length - 1}
+                              className="p-2 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 border border-slate-800 transition"
+                              title="Move Down"
+                            >
+                              <MoveDown className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteScreen(screen.id)}
+                              className="p-2 rounded-lg bg-slate-950 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 border border-slate-800 transition"
+                              title="Delete Screen Metadata"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

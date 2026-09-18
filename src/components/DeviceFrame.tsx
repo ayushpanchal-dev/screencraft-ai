@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DeviceConfig } from '../types';
+import { getRenderableImageUrl } from '../utils/imageUrlUtils';
+import { AlertCircle, Image as ImageIcon } from 'lucide-react';
 
 interface DeviceFrameProps {
   imageSrc: string;
@@ -16,6 +18,9 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   className = '',
   scale = 1,
 }) => {
+  const [hasError, setHasError] = useState(false);
+  const resolvedSrc = getRenderableImageUrl(imageSrc);
+
   const deviceType = config?.deviceType || 'iphone';
   const color = config?.color || 'titanium';
   const showGlare = config?.showGlare ?? true;
@@ -125,13 +130,23 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
           </div>
 
           {/* Actual Screenshot Content */}
-          <div className="w-full h-full relative">
-            <img
-              src={imageSrc}
-              alt={title || 'App screenshot'}
-              className="w-full h-full object-cover object-top select-none"
-              draggable={false}
-            />
+          <div className="w-full h-full relative flex items-center justify-center">
+            {resolvedSrc && !hasError ? (
+              <img
+                src={resolvedSrc}
+                alt={title || 'App screenshot'}
+                className="w-full h-full object-cover object-top select-none"
+                draggable={false}
+                onError={() => setHasError(true)}
+              />
+            ) : (
+              <div className="p-6 text-center text-slate-500 space-y-2">
+                <AlertCircle className="w-8 h-8 text-amber-500/80 mx-auto" />
+                <p className="text-[11px] text-slate-400 font-medium leading-tight">
+                  Image could not be loaded. Ensure the URL is valid and set to public.
+                </p>
+              </div>
+            )}
 
             {/* Screen Glass Glare Gloss Overlay */}
             {showGlare && (

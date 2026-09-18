@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Project, DevicePreviewViewport } from '../types';
 import { DeviceFrame } from './DeviceFrame';
+import { getScreenImageUrl } from '../utils/imageUrlUtils';
 import {
   Download,
   Github,
@@ -196,7 +197,7 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
             <div className="lg:col-span-5 flex justify-center items-center">
               {currentActiveScreen ? (
                 <DeviceFrame
-                  imageSrc={currentActiveScreen.imageUrl}
+                  imageSrc={getScreenImageUrl(currentActiveScreen)}
                   title={currentActiveScreen.title}
                   config={project.deviceConfig}
                   scale={0.9}
@@ -279,7 +280,7 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
                 {/* Left Mockup Display */}
                 <div className="md:col-span-6 flex items-center justify-center">
                   <DeviceFrame
-                    imageSrc={currentActiveScreen.imageUrl}
+                    imageSrc={getScreenImageUrl(currentActiveScreen)}
                     title={currentActiveScreen.title}
                     config={project.deviceConfig}
                     scale={0.92}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Project } from '../types';
+import { getScreenImageUrl } from '../utils/imageUrlUtils';
 import {
   Plus,
   Search,
@@ -18,20 +19,36 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { LogIn, LogOut, ShieldCheck, Database, Loader2 } from 'lucide-react';
+
 interface DashboardViewProps {
   projects: Project[];
+  isAdmin?: boolean;
+  currentUserEmail?: string | null;
+  isLoadingProjects?: boolean;
+  hasLocalProjects?: boolean;
   onSelectProject: (projectId: string) => void;
   onCreateNewProject: () => void;
   onDeleteProject: (projectId: string) => void;
   onQuickPreview: (projectId: string) => void;
+  onLoginClick?: () => void;
+  onLogoutClick?: () => void;
+  onOpenMigrationModal?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   projects,
+  isAdmin = false,
+  currentUserEmail = null,
+  isLoadingProjects = false,
+  hasLocalProjects = false,
   onSelectProject,
   onCreateNewProject,
   onDeleteProject,
   onQuickPreview,
+  onLoginClick,
+  onLogoutClick,
+  onOpenMigrationModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -70,6 +87,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
                   {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
                 </span>
+                {isAdmin && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Admin Active</span>
+                  </span>
+                )}
               </div>
             </div>
             <p className="text-xs md:text-sm text-slate-400 max-w-xl">
@@ -77,15 +100,49 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
           </div>
 
-          {/* New Project CTA */}
+          {/* Admin Header Actions */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={onCreateNewProject}
-              className="px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md transition flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Flutter App</span>
-            </button>
+            {isAdmin && hasLocalProjects && onOpenMigrationModal && (
+              <button
+                onClick={onOpenMigrationModal}
+                className="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition flex items-center gap-1.5"
+                title="Migrate localStorage projects to Cloud Firestore"
+              >
+                <Database className="w-4 h-4 text-amber-400" />
+                <span className="hidden sm:inline">Sync Local Data</span>
+              </button>
+            )}
+
+            {isAdmin ? (
+              <>
+                <button
+                  onClick={onCreateNewProject}
+                  className="px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md transition flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Flutter App</span>
+                </button>
+                {onLogoutClick && (
+                  <button
+                    onClick={onLogoutClick}
+                    className="p-2.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800 transition"
+                    title={`Logged in as ${currentUserEmail || 'Admin'}. Click to Logout.`}
+                  >
+                    <LogOut className="w-4 h-4 text-rose-400" />
+                  </button>
+                )}
+              </>
+            ) : (
+              onLoginClick && (
+                <button
+                  onClick={onLoginClick}
+                  className="px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition flex items-center gap-2"
+                >
+                  <LogIn className="w-4 h-4 text-indigo-400" />
+                  <span>Admin Login</span>
+                </button>
+              )
+            )}
           </div>
         </header>
 
@@ -186,7 +243,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       ) : heroScreen ? (
                         <div className="relative w-28 h-44 rounded-xl overflow-hidden border border-slate-700 shadow-2xl transition group-hover:scale-105 duration-300">
                           <img
-                            src={heroScreen.imageUrl}
+                            src={getScreenImageUrl(heroScreen)}
                             alt={project.name}
                             loading="lazy"
                             className="w-full h-full object-cover object-top"

@@ -1,9 +1,12 @@
 export interface AppScreen {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   imageUrl: string;
-  order: number;
+  sourceUrl?: string;
+  storagePath?: string;
+  firebaseStorageUrl?: string;
+  order?: number;
   category?: string;
   aiExtractedFeatures?: string[];
   aiAnalysisDone?: boolean;

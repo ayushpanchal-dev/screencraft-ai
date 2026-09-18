@@ -1,4 +1,5 @@
 import { Project } from '../types';
+import { getScreenImageUrl } from '../utils/imageUrlUtils';
 
 export class ExportService {
   /**
@@ -17,7 +18,7 @@ export class ExportService {
         <div class="screen-card">
           <div class="phone-frame">
             <div class="phone-notch"></div>
-            <img src="${s.imageUrl}" alt="${s.title}" class="screen-img" />
+            <img src="${getScreenImageUrl(s)}" alt="${s.title}" class="screen-img" />
           </div>
           <div class="screen-info">
             <span class="screen-num">Screen 0${idx + 1}</span>

@@ -1,0 +1,24 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if request is from an authenticated admin
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Screenshot Assets
+    match /projects/{projectId}/screenshots/{fileName} {
+      // Public visitors can read uploaded screenshots
+      allow read: if true;
+
+      // Only authenticated admin users can upload, modify, or delete screenshots
+      // Validates image MIME type and 10MB maximum file size
+      allow create, update: if isAdmin()
+                            && request.resource.contentType.matches('image/.*')
+                            && request.resource.size < 10 * 1024 * 1024;
+
+      allow delete: if isAdmin();
+    }
+  }
+}
