@@ -7,6 +7,7 @@ import {
   deleteDoc,
   query,
   where,
+  limit,
   orderBy,
   serverTimestamp,
   Timestamp,
@@ -98,9 +99,10 @@ export class FirebaseService {
   }
 
   /**
-   * Fetch a project by its document ID or public slug from Cloud Firestore.
+   * Fetch a public project by slug for unauthenticated visitors.
+   * Satisfies Firestore security rule constraint (where type == 'public').
    */
-  static async getProjectBySlug(idOrSlug: string): Promise<Project | undefined> {
+  static async getPublicProjectBySlug(idOrSlug: string): Promise<Project | undefined> {
     if (!idOrSlug) return undefined;
     const cleanIdOrSlug = idOrSlug.trim().toLowerCase();
 
@@ -111,21 +113,87 @@ export class FirebaseService {
     try {
       const colRef = collection(db, PROJECTS_COLLECTION);
 
-      // 1. Query by exact slug
-      const slugQuery = query(colRef, where('slug', '==', cleanIdOrSlug));
+      // 1. Query by exact slug AND type == 'public' (satisfies public Firestore security rule)
+      const publicSlugQuery = query(
+        colRef,
+        where('slug', '==', cleanIdOrSlug),
+        where('type', '==', 'public'),
+        limit(1)
+      );
+      const slugSnap = await getDocs(publicSlugQuery);
+      if (!slugSnap.empty) {
+        console.log('[ScreenCraft AI] Public project found via slug & type query:', cleanIdOrSlug);
+        return mapDocToProject(slugSnap.docs[0]);
+      }
+
+      // 2. Direct doc ID lookup if it is a public project
+      const docRef = doc(db, PROJECTS_COLLECTION, idOrSlug);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const proj = mapDocToProject(docSnap);
+        if (proj.type === 'public' || !proj.type) {
+          return proj;
+        }
+      }
+
+      // 3. Fallback: fetch all public projects and match normalized ID or slug
+      const allProjects = await this.getProjects();
+      const norm = cleanIdOrSlug.replace(/[^a-z0-9]/g, '');
+      const match = allProjects.find((p) => {
+        if (p.type !== 'public' && p.type) return false;
+        if (p.id.toLowerCase() === cleanIdOrSlug) return true;
+        if (p.slug && p.slug.toLowerCase() === cleanIdOrSlug) return true;
+        const pSlugNorm = p.slug?.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (pSlugNorm === norm) return true;
+        const pIdNorm = p.id.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (pIdNorm === norm) return true;
+        const pNameNorm = p.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (pNameNorm === norm) return true;
+        return false;
+      });
+
+      if (match) return match;
+      return StorageService.getProjectByIdOrSlug(idOrSlug);
+    } catch (err: any) {
+      const errorCode = err?.code || 'unknown-error';
+      console.warn(`[ScreenCraft AI] Public project lookup error (${errorCode}):`, err.message || err);
+      return StorageService.getProjectByIdOrSlug(idOrSlug);
+    }
+  }
+
+  /**
+   * Fetch a project by document ID or public slug from Cloud Firestore.
+   * If caller is unauthenticated or isAdmin is false, uses getPublicProjectBySlug.
+   */
+  static async getProjectBySlug(idOrSlug: string, isAdmin: boolean = false): Promise<Project | undefined> {
+    if (!idOrSlug) return undefined;
+
+    if (!isAdmin) {
+      return this.getPublicProjectBySlug(idOrSlug);
+    }
+
+    const cleanIdOrSlug = idOrSlug.trim().toLowerCase();
+
+    if (!isFirebaseConfigured) {
+      return StorageService.getProjectByIdOrSlug(idOrSlug);
+    }
+
+    try {
+      const colRef = collection(db, PROJECTS_COLLECTION);
+
+      // Admin query without type restriction
+      const slugQuery = query(colRef, where('slug', '==', cleanIdOrSlug), limit(1));
       const slugSnap = await getDocs(slugQuery);
       if (!slugSnap.empty) {
         return mapDocToProject(slugSnap.docs[0]);
       }
 
-      // 2. Direct document ID lookup
       const docRef = doc(db, PROJECTS_COLLECTION, idOrSlug);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         return mapDocToProject(docSnap);
       }
 
-      // 3. Fallback: fetch all projects and match normalized ID or slug
       const allProjects = await this.getProjects();
       const norm = cleanIdOrSlug.replace(/[^a-z0-9]/g, '');
       const match = allProjects.find((p) => {
@@ -142,8 +210,9 @@ export class FirebaseService {
 
       if (match) return match;
       return StorageService.getProjectByIdOrSlug(idOrSlug);
-    } catch (err) {
-      console.warn('Error looking up project by slug in Firestore, using local fallback:', err);
+    } catch (err: any) {
+      const errorCode = err?.code || 'unknown-error';
+      console.warn(`[ScreenCraft AI] Admin project lookup error (${errorCode}):`, err.message || err);
       return StorageService.getProjectByIdOrSlug(idOrSlug);
     }
   }

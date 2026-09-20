@@ -125,7 +125,7 @@ export default function App() {
     if (targetIdOrSlug) {
       let isMounted = true;
       setIsTargetLoading(true);
-      FirebaseService.getProjectBySlug(targetIdOrSlug)
+      FirebaseService.getProjectBySlug(targetIdOrSlug, isAdmin)
         .then((proj) => {
           if (isMounted) {
             setTargetProject(proj || null);
@@ -146,7 +146,7 @@ export default function App() {
       setTargetProject(null);
       setIsTargetLoading(false);
     }
-  }, [targetIdOrSlug]);
+  }, [targetIdOrSlug, isAdmin]);
 
   // CRUD Handlers
   const handleSelectProject = (projectId: string) => {

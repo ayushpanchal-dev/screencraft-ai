@@ -9,8 +9,9 @@ service cloud.firestore {
 
     // Projects Collection Rules
     match /projects/{projectId} {
-      // Public visitors can read any project document for showcase viewing
-      allow read: if true;
+      // Unauthenticated public visitors can read projects where type == 'public'
+      // Authenticated admin users can read any project (public, professional, private)
+      allow read: if resource == null || resource.data.type == 'public' || resource.data.type == null || isAdmin();
       
       // Only authenticated admin users can create, update, or delete project documents
       allow create, update, delete: if isAdmin();
