@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { loginAdmin } from '../services/authService';
 import { ShieldCheck, Mail, Lock, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { AttributionFooter } from './AttributionFooter';
 
 interface LoginViewProps {
   onSuccessLogin: () => void;
@@ -132,9 +133,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
         </p>
       </div>
 
-      <footer className="text-center text-xs text-slate-600 pt-6">
-        ScreenCraft AI • Secure Firebase Authentication
-      </footer>
+      <AttributionFooter className="mt-8 rounded-2xl border border-slate-900" />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileQuestion, ArrowLeft, Home } from 'lucide-react';
+import { AttributionFooter } from './AttributionFooter';
 
 interface NotFoundViewProps {
   isFromPortfolio?: boolean;
@@ -10,7 +11,7 @@ export const NotFoundView: React.FC<NotFoundViewProps> = ({
   isFromPortfolio = false,
   onBackToDashboard,
 }) => {
-  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || '#';
+  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || 'https://ayush-panchal.vercel.app/';
 
   return (
     <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col justify-between p-6 md:p-12">
@@ -57,9 +58,7 @@ export const NotFoundView: React.FC<NotFoundViewProps> = ({
         </div>
       </div>
 
-      <footer className="text-center text-xs text-slate-600 pt-6">
-        ScreenCraft AI • Showcase & Portfolio Generator
-      </footer>
+      <AttributionFooter className="mt-8 rounded-2xl border border-slate-900" />
     </div>
   );
 };

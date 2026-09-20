@@ -25,6 +25,8 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 
+import { AttributionFooter } from './AttributionFooter';
+
 interface ShowcaseViewProps {
   project: Project;
   viewport?: DevicePreviewViewport;
@@ -72,7 +74,7 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
   const screens = project.screens || [];
   const showcase = project.showcase || {};
   const links = project.links || {};
-  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || '#';
+  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || 'https://ayush-panchal.vercel.app/';
 
   // Viewport container sizing logic
   let viewportWidthClass = 'w-full max-w-7xl';
@@ -424,9 +426,7 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
         </section>
 
         {/* Footer */}
-        <footer className="py-8 px-6 text-center text-slate-600 text-xs border-t border-slate-900">
-          <p>© {new Date().getFullYear()} {project.name}. Interactive Showcase generated with ScreenCraft AI.</p>
-        </footer>
+        <AttributionFooter />
       </div>
     </div>
   );

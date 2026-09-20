@@ -1,6 +1,7 @@
 import React from 'react';
 import { Project } from '../types';
 import { ShieldAlert, ArrowLeft, Lock, Building2, ExternalLink } from 'lucide-react';
+import { AttributionFooter } from './AttributionFooter';
 
 interface PrivateProjectViewProps {
   project?: Project;
@@ -15,7 +16,7 @@ export const PrivateProjectView: React.FC<PrivateProjectViewProps> = ({
   isFromPortfolio = false,
   onBackToDashboard,
 }) => {
-  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || '#';
+  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || 'https://ayush-panchal.vercel.app/';
   const projectName = project?.name || 'Private Project';
   const shortDescription =
     project?.description ||
@@ -105,9 +106,7 @@ export const PrivateProjectView: React.FC<PrivateProjectViewProps> = ({
         </div>
       </div>
 
-      <footer className="text-center text-xs text-slate-600 pt-6">
-        ScreenCraft AI • Restricted Project Notice
-      </footer>
+      <AttributionFooter className="mt-8 rounded-2xl border border-slate-900" />
     </div>
   );
 };

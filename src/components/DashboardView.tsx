@@ -20,6 +20,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 import { LogIn, LogOut, ShieldCheck, Database, Loader2 } from 'lucide-react';
+import { AttributionFooter } from './AttributionFooter';
 
 interface DashboardViewProps {
   projects: Project[];
@@ -194,15 +195,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <span>All projects save automatically to your local browser storage</span>
               </div>
             </div>
-            <div className="pt-2 flex items-center justify-center">
-              <button
-                onClick={onCreateNewProject}
-                className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-bold shadow-lg shadow-indigo-600/30 transition hover:-translate-y-0.5 flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add My Flutter App Project</span>
-              </button>
-            </div>
+            {isAdmin && (
+              <div className="pt-2 flex items-center justify-center">
+                <button
+                  onClick={onCreateNewProject}
+                  className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-bold shadow-lg shadow-indigo-600/30 transition hover:-translate-y-0.5 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add My Flutter App Project</span>
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -331,31 +334,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           </span>
                         </button>
 
-                        <button
-                          onClick={() => onSelectProject(project.id)}
-                          className="p-2.5 rounded-xl bg-slate-950 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800 transition text-xs font-semibold"
-                          title="Edit Project Details"
-                        >
-                          Edit
-                        </button>
+                        {isAdmin && (
+                          <>
+                            <button
+                              onClick={() => onSelectProject(project.id)}
+                              className="p-2.5 rounded-xl bg-slate-950 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800 transition text-xs font-semibold"
+                              title="Edit Project Details"
+                            >
+                              Edit
+                            </button>
 
-                        {deleteConfirmId === project.id ? (
-                          <button
-                            onClick={() => onDeleteProject(project.id)}
-                            className="p-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold transition"
-                            title="Confirm Delete"
-                          >
-                            Confirm
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => setDeleteConfirmId(project.id)}
-                            onMouseLeave={() => setDeleteConfirmId(null)}
-                            className="p-2.5 rounded-xl bg-slate-950 text-slate-400 hover:text-rose-400 hover:bg-slate-800 border border-slate-800 transition"
-                            title="Delete Project"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                            {deleteConfirmId === project.id ? (
+                              <button
+                                onClick={() => onDeleteProject(project.id)}
+                                className="p-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold transition"
+                                title="Confirm Delete"
+                              >
+                                Confirm
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setDeleteConfirmId(project.id)}
+                                onMouseLeave={() => setDeleteConfirmId(null)}
+                                className="p-2.5 rounded-xl bg-slate-950 text-slate-400 hover:text-rose-400 hover:bg-slate-800 border border-slate-800 transition"
+                                title="Delete Project"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -365,6 +372,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </AnimatePresence>
           </div>
         )}
+
+        <AttributionFooter className="mt-12 rounded-2xl border border-slate-900" />
       </div>
     </div>
   );

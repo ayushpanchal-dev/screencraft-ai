@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { renderLucideIcon } from './ShowcaseView';
+import { AttributionFooter } from './AttributionFooter';
 
 interface CaseStudyViewProps {
   project: Project;
@@ -28,7 +29,7 @@ export const CaseStudyView: React.FC<CaseStudyViewProps> = ({
 }) => {
   const primaryColor = project.primaryColor || '#2563EB';
   const showcase = project.showcase || {};
-  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || '#';
+  const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || 'https://ayush-panchal.vercel.app/';
 
   return (
     <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white pb-20">
@@ -172,27 +173,7 @@ export const CaseStudyView: React.FC<CaseStudyViewProps> = ({
         )}
 
         {/* Footer Navigation */}
-        <footer className="pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} {project.name} • Professional Case Study</p>
-          {isFromPortfolio ? (
-            <a
-              href={portfolioUrl}
-              className="text-indigo-400 hover:underline flex items-center gap-1 font-semibold"
-            >
-              <span>Return to Main Portfolio</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          ) : (
-            onBackToDashboard && (
-              <button
-                onClick={onBackToDashboard}
-                className="text-slate-400 hover:text-white transition"
-              >
-                Return to ScreenCraft Dashboard
-              </button>
-            )
-          )}
-        </footer>
+        <AttributionFooter className="mt-8 rounded-2xl border border-slate-900" />
       </div>
     </div>
   );
