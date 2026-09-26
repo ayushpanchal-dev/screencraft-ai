@@ -8,15 +8,15 @@ interface AttributionFooterProps {
 export const AttributionFooter: React.FC<AttributionFooterProps> = ({ className = '' }) => {
   return (
     <footer
-      className={`w-full py-8 px-6 text-center text-xs text-slate-400 border-t border-slate-900 bg-slate-950/80 backdrop-blur-sm ${className}`}
+      className={`w-full py-6 sm:py-8 px-4 sm:px-6 text-center text-xs text-slate-400 border-t border-slate-900 bg-slate-950/80 backdrop-blur-sm ${className}`}
     >
-      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
+      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-[11px] font-mono font-medium">
-            <Sparkles className="w-3 h-3 text-indigo-400" />
+            <Sparkles className="w-3 h-3 text-indigo-400 shrink-0" />
             <span>ScreenCraft AI</span>
           </span>
-          <span className="text-slate-600">•</span>
+          <span className="text-slate-600 hidden xs:inline">•</span>
           <span>
             Built by{' '}
             <a
@@ -31,7 +31,7 @@ export const AttributionFooter: React.FC<AttributionFooterProps> = ({ className 
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-slate-400">
+        <div className="flex items-center justify-center gap-4 text-slate-400 pt-1 sm:pt-0">
           <a
             href="https://ayush-panchal.vercel.app/"
             target="_blank"

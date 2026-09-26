@@ -23,32 +23,32 @@ export const PrivateProjectView: React.FC<PrivateProjectViewProps> = ({
     'This project is private and restricted under enterprise non-disclosure agreements.';
 
   return (
-    <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col justify-between p-6 md:p-12">
-      <div className="max-w-3xl mx-auto w-full space-y-8 my-auto text-center">
+    <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col justify-between p-4 sm:p-6 md:p-12">
+      <div className="max-w-3xl mx-auto w-full space-y-6 sm:space-y-8 my-auto text-center">
         {/* Top Restricted Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-amber-400">
-          <Lock className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] sm:text-xs font-mono font-bold text-amber-400">
+          <Lock className="w-3.5 h-3.5 shrink-0" />
           <span>Restricted / Confidential Access</span>
         </div>
 
         {/* Header Icon */}
-        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center mx-auto shadow-2xl">
-          <ShieldAlert className="w-8 h-8" />
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center mx-auto shadow-2xl">
+          <ShieldAlert className="w-6 h-6 sm:w-8 sm:h-8" />
         </div>
 
         {/* Title & Description */}
-        <div className="space-y-3">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+        <div className="space-y-2 sm:space-y-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight break-words">
             {projectName}
           </h1>
-          <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl mx-auto">
             {shortDescription}
           </p>
         </div>
 
         {/* Safe Metadata Cards if available */}
         {project && (
-          <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 max-w-md mx-auto space-y-3 text-left">
+          <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4 sm:p-6 max-w-md mx-auto space-y-3 text-left">
             <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-2">
               <span className="font-semibold text-slate-500">Category:</span>
               <span className="text-slate-300 font-medium">{project.category || 'Enterprise'}</span>
@@ -74,7 +74,7 @@ export const PrivateProjectView: React.FC<PrivateProjectViewProps> = ({
         )}
 
         {/* Confidentiality Box */}
-        <div className="bg-slate-900/50 rounded-2xl border border-amber-500/20 p-5 text-xs text-slate-400 max-w-lg mx-auto leading-relaxed">
+        <div className="bg-slate-900/50 rounded-2xl border border-amber-500/20 p-4 sm:p-5 text-xs text-slate-400 max-w-lg mx-auto leading-relaxed">
           <p className="font-bold text-amber-300 mb-1 flex items-center justify-center gap-1.5">
             <Lock className="w-3.5 h-3.5" />
             <span>Confidentiality Notice</span>
@@ -83,11 +83,11 @@ export const PrivateProjectView: React.FC<PrivateProjectViewProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
+        <div className="pt-2 sm:pt-4 flex flex-wrap items-center justify-center gap-3">
           {isFromPortfolio ? (
             <a
               href={portfolioUrl}
-              className="px-6 py-3 rounded-xl text-xs md:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition flex items-center justify-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Main Portfolio</span>
@@ -96,7 +96,7 @@ export const PrivateProjectView: React.FC<PrivateProjectViewProps> = ({
             onBackToDashboard && (
               <button
                 onClick={onBackToDashboard}
-                className="px-6 py-3 rounded-xl text-xs md:text-sm font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition flex items-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl text-xs sm:text-sm font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4 text-indigo-400" />
                 <span>Return to ScreenCraft Homepage</span>

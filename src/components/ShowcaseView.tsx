@@ -89,25 +89,27 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
     <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white pb-20">
       <div className={`mx-auto transition-all duration-300 ${viewportWidthClass}`}>
         {/* Top Navbar */}
-        <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/90 border-b border-slate-800/80 px-6 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/90 border-b border-slate-800/80 px-4 sm:px-6 py-3 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {isFromPortfolio ? (
               <a
                 href={portfolioUrl}
-                className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/40 shadow-lg shadow-indigo-600/20 transition hover:-translate-x-0.5 mr-2 shrink-0"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/40 shadow-lg shadow-indigo-600/20 transition hover:-translate-x-0.5 shrink-0"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Portfolio</span>
+                <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Back to Portfolio</span>
+                <span className="xs:hidden">Portfolio</span>
               </a>
             ) : (
               onBackToDashboard && (
                 <button
                   onClick={onBackToDashboard}
-                  className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 shadow-md transition hover:-translate-x-0.5 mr-2 shrink-0"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold rounded-xl text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 shadow-md transition hover:-translate-x-0.5 shrink-0"
                   title="Return to Dashboard"
                 >
-                  <ArrowLeft className="w-4 h-4 text-indigo-400" />
-                  <span>Back to Dashboard</span>
+                  <ArrowLeft className="w-3.5 h-3.5 text-indigo-400" />
+                  <span className="hidden xs:inline">Back to Dashboard</span>
+                  <span className="xs:hidden">Dashboard</span>
                 </button>
               )
             )}
@@ -115,53 +117,56 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
             <img
               src={project.logoUrl || '/screencraft-logo.png'}
               alt={project.name || 'ScreenCraft AI'}
-              className="w-8 h-8 rounded-lg object-contain bg-slate-900 border border-slate-800 p-0.5 shrink-0 shadow-sm"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-contain bg-slate-900 border border-slate-800 p-0.5 shrink-0 shadow-sm"
             />
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-base md:text-lg text-white tracking-tight">{project.name}</span>
-              <span className="hidden sm:inline-block text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/50 font-medium">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-bold text-xs sm:text-base md:text-lg text-white tracking-tight truncate max-w-[110px] sm:max-w-xs md:max-w-none">
+                {project.name}
+              </span>
+              <span className="hidden md:inline-block text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/50 font-medium shrink-0">
                 {project.category || 'Mobile App'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             {links.githubUrl && (
               <a
                 href={links.githubUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 transition"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold rounded-lg text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 transition"
                 title="GitHub Repo"
               >
-                <Github className="w-4 h-4" />
-                <span>GitHub Repository</span>
+                <Github className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">GitHub Repository</span>
+                <span className="sm:hidden">GitHub</span>
               </a>
             )}
           </div>
         </header>
 
         {/* Hero Section */}
-        <section className="relative pt-16 pb-20 px-6 overflow-hidden">
+        <section className="relative pt-8 sm:pt-16 pb-12 sm:pb-20 px-4 sm:px-6 overflow-hidden">
           {/* Subtle radial ambient light */}
           <div
-            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl pointer-events-none"
+            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] rounded-full opacity-20 blur-3xl pointer-events-none"
             style={{ backgroundColor: primaryColor }}
           />
 
-          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
             {/* Left Hero Content */}
-            <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Mobile App Case Study & Interactive Showcase</span>
+            <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] sm:text-xs font-medium text-slate-300">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span className="truncate">Mobile App Case Study & Interactive Showcase</span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight break-words">
                 {showcase.heroTitle || project.name}
               </h1>
 
-              <p className="text-lg md:text-xl text-slate-400 leading-relaxed max-w-2xl">
+              <p className="text-sm sm:text-lg md:text-xl text-slate-400 leading-relaxed max-w-2xl">
                 {showcase.heroTagline || project.tagline || project.description}
               </p>
 
@@ -172,22 +177,22 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
                     href={links.githubUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-sm font-bold text-white shadow-xl hover:shadow-2xl transition hover:-translate-y-0.5"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xl hover:shadow-2xl transition hover:-translate-y-0.5"
                     style={{ backgroundColor: primaryColor }}
                   >
-                    <Github className="w-4.5 h-4.5" />
+                    <Github className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                     <span>View Source Code</span>
                   </a>
                 )}
               </div>
 
               {/* Tech Stack Pills */}
-              <div className="pt-4 flex flex-wrap items-center gap-2">
+              <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="text-xs text-slate-500 font-medium mr-1">Built with:</span>
                 {project.techStack.map((tech, idx) => (
                   <span
                     key={`${tech}-${idx}`}
-                    className="text-xs px-3 py-1 rounded-md bg-slate-900/90 text-slate-300 border border-slate-800 font-mono"
+                    className="text-[11px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md bg-slate-900/90 text-slate-300 border border-slate-800 font-mono"
                   >
                     {tech}
                   </span>
@@ -202,10 +207,10 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
                   imageSrc={getScreenImageUrl(currentActiveScreen)}
                   title={currentActiveScreen.title}
                   config={project.deviceConfig}
-                  scale={0.9}
+                  scale={0.85}
                 />
               ) : (
-                <div className="w-[280px] h-[540px] rounded-[40px] bg-slate-900 border-2 border-slate-800 flex flex-col items-center justify-center p-6 text-center text-slate-500">
+                <div className="w-[260px] h-[480px] sm:w-[280px] sm:h-[540px] rounded-[40px] bg-slate-900 border-2 border-slate-800 flex flex-col items-center justify-center p-6 text-center text-slate-500">
                   <Smartphone className="w-12 h-12 mb-3 opacity-40" />
                   <p className="text-sm">No screens uploaded yet</p>
                 </div>
@@ -215,27 +220,27 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
         </section>
 
         {/* Overview & Architecture Section */}
-        <section className="py-16 px-6 border-t border-slate-900 bg-slate-950/50">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-3">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white">Project Overview</h2>
-              <p className="text-slate-400 text-sm max-w-xl mx-auto">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 border-t border-slate-900 bg-slate-950/50">
+          <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+            <div className="text-center space-y-2 sm:space-y-3">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white">Project Overview</h2>
+              <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto">
                 Comprehensive technical insights and architecture design.
               </p>
             </div>
 
-            <div className="bg-slate-900/80 rounded-2xl border border-slate-800/80 p-6 md:p-8 space-y-6">
-              <p className="text-slate-300 leading-relaxed text-base">
+            <div className="bg-slate-900/80 rounded-2xl border border-slate-800/80 p-5 sm:p-8 space-y-4 sm:space-y-6">
+              <p className="text-slate-300 leading-relaxed text-sm sm:text-base">
                 {showcase.overviewSummary || project.description}
               </p>
 
               {showcase.architectureNotes && (
                 <div className="pt-4 border-t border-slate-800">
-                  <div className="flex items-center gap-2 text-indigo-400 font-semibold text-sm mb-2">
+                  <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs sm:text-sm mb-2">
                     <Layers className="w-4 h-4" />
                     <span>Architecture & Clean Code Structure</span>
                   </div>
-                  <p className="text-xs md:text-sm font-mono text-slate-400 leading-relaxed bg-slate-950/80 p-4 rounded-xl border border-slate-800/60">
+                  <p className="text-xs sm:text-sm font-mono text-slate-400 leading-relaxed bg-slate-950/80 p-3.5 sm:p-4 rounded-xl border border-slate-800/60 break-words">
                     {showcase.architectureNotes}
                   </p>
                 </div>
@@ -246,24 +251,24 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
 
         {/* Interactive Screenshot Carousel / Showcase */}
         {screens.length > 0 && (
-          <section className="py-20 px-6 border-t border-slate-900 bg-slate-900/30">
-            <div className="max-w-6xl mx-auto space-y-12">
-              <div className="text-center space-y-3">
-                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+          <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-slate-900 bg-slate-900/30">
+            <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12">
+              <div className="text-center space-y-2 sm:space-y-3">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
                   Interactive Screen Showcase
                 </h2>
-                <p className="text-slate-400 text-base max-w-xl mx-auto">
+                <p className="text-slate-400 text-xs sm:text-base max-w-xl mx-auto">
                   Explore mobile user interfaces, screen titles, and feature callouts.
                 </p>
               </div>
 
               {/* Screen Selector Tabs */}
-              <div className="flex justify-center items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <div className="flex justify-start md:justify-center items-center gap-2 overflow-x-auto pb-3 px-1 scrollbar-none">
                 {screens.map((scr, idx) => (
                   <button
                     key={scr.id || `scr-${idx}`}
                     onClick={() => setActiveScreenIndex(idx)}
-                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 border whitespace-nowrap ${
+                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 border whitespace-nowrap shrink-0 ${
                       activeScreenIndex === idx
                         ? 'bg-slate-800 text-white border-indigo-500 shadow-md'
                         : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:text-slate-200'
@@ -278,19 +283,19 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
               </div>
 
               {/* Selected Screen Spotlight View */}
-              <div className="bg-slate-900/90 rounded-3xl border border-slate-800 p-8 md:p-12 grid grid-cols-1 md:grid-cols-12 gap-8 items-center shadow-2xl">
+              <div className="bg-slate-900/90 rounded-3xl border border-slate-800 p-5 sm:p-8 md:p-12 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center shadow-2xl">
                 {/* Left Mockup Display */}
                 <div className="md:col-span-6 flex items-center justify-center">
                   <DeviceFrame
                     imageSrc={getScreenImageUrl(currentActiveScreen)}
                     title={currentActiveScreen.title}
                     config={project.deviceConfig}
-                    scale={0.92}
+                    scale={0.88}
                   />
                 </div>
 
                 {/* Right Screen Detail Card */}
-                <div className="md:col-span-6 space-y-6 text-left">
+                <div className="md:col-span-6 space-y-4 sm:space-y-6 text-left">
                   <div className="inline-block px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
                     {currentActiveScreen.category || 'Screen Focus'}
                   </div>
@@ -359,29 +364,29 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
 
         {/* Feature Highlights Grid */}
         {showcase.features && showcase.features.length > 0 && (
-          <section className="py-20 px-6 border-t border-slate-900">
-            <div className="max-w-6xl mx-auto space-y-12">
-              <div className="text-center space-y-3">
-                <h2 className="text-3xl font-extrabold tracking-tight text-white">Key Capabilities</h2>
-                <p className="text-slate-400 text-base max-w-xl mx-auto">
+          <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-slate-900">
+            <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12">
+              <div className="text-center space-y-2 sm:space-y-3">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Key Capabilities</h2>
+                <p className="text-slate-400 text-xs sm:text-base max-w-xl mx-auto">
                   Engineered for seamless usability and high performance
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {showcase.features.map((feat, idx) => (
                   <div
                     key={feat.id || `feat-${idx}`}
-                    className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition space-y-4"
+                    className="p-5 sm:p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition space-y-3 sm:space-y-4"
                   >
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white shadow-lg"
                       style={{ backgroundColor: `${primaryColor}22`, color: primaryColor }}
                     >
-                      {renderLucideIcon(feat.iconName, 'w-6 h-6')}
+                      {renderLucideIcon(feat.iconName, 'w-5 h-5 sm:w-6 sm:h-6')}
                     </div>
-                    <h3 className="text-lg font-bold text-white">{feat.title}</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed">{feat.description}</p>
+                    <h3 className="text-base sm:text-lg font-bold text-white">{feat.title}</h3>
+                    <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{feat.description}</p>
                   </div>
                 ))}
               </div>
@@ -390,20 +395,20 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
         )}
 
         {/* Bottom Download Banner */}
-        <section className="py-16 px-6 border-t border-slate-900">
-          <div className="max-w-4xl mx-auto text-center bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 rounded-3xl border border-slate-800 p-10 md:p-14 space-y-6 shadow-2xl">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white">Experience {project.name} Today</h2>
-            <p className="text-slate-400 text-base max-w-xl mx-auto">
+        <section className="py-12 sm:py-16 px-4 sm:px-6 border-t border-slate-900">
+          <div className="max-w-4xl mx-auto text-center bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 rounded-3xl border border-slate-800 p-6 sm:p-10 md:p-14 space-y-4 sm:space-y-6 shadow-2xl">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white">Experience {project.name} Today</h2>
+            <p className="text-slate-400 text-xs sm:text-base max-w-xl mx-auto">
               Download the APK or explore the source repository on GitHub.
             </p>
 
-            <div className="flex flex-wrap justify-center items-center gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 pt-2 sm:pt-4 w-full sm:w-auto">
               {links.apkUrl && (
                 <a
                   href={links.apkUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-6 py-3.5 rounded-xl font-bold text-white text-sm shadow-xl transition hover:opacity-90 flex items-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-white text-xs sm:text-sm shadow-xl transition hover:opacity-90 flex items-center justify-center gap-2"
                   style={{ backgroundColor: primaryColor }}
                 >
                   <Download className="w-4 h-4" />
@@ -415,7 +420,7 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
                   href={links.githubUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-6 py-3.5 rounded-xl font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 text-sm border border-slate-700 transition flex items-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm border border-slate-700 transition flex items-center justify-center gap-2"
                 >
                   <Github className="w-4 h-4" />
                   <span>View GitHub</span>

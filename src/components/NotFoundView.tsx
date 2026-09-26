@@ -14,32 +14,32 @@ export const NotFoundView: React.FC<NotFoundViewProps> = ({
   const portfolioUrl = import.meta.env.VITE_PORTFOLIO_URL || 'https://ayush-panchal.vercel.app/';
 
   return (
-    <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col justify-between p-6 md:p-12">
-      <div className="max-w-xl mx-auto w-full space-y-8 my-auto text-center">
+    <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col justify-between p-4 sm:p-6 md:p-12">
+      <div className="max-w-xl mx-auto w-full space-y-6 sm:space-y-8 my-auto text-center">
         {/* Icon */}
-        <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center mx-auto shadow-2xl">
-          <FileQuestion className="w-10 h-10" />
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center mx-auto shadow-2xl">
+          <FileQuestion className="w-8 h-8 sm:w-10 sm:h-10" />
         </div>
 
         {/* Header */}
-        <div className="space-y-3">
-          <span className="text-xs font-mono font-bold text-indigo-400 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 uppercase tracking-wider">
+        <div className="space-y-2 sm:space-y-3">
+          <span className="text-[11px] sm:text-xs font-mono font-bold text-indigo-400 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 uppercase tracking-wider">
             404 — Project Not Found
           </span>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight break-words">
             Project Not Found
           </h1>
-          <p className="text-slate-400 text-sm md:text-base leading-relaxed">
+          <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
             The requested project URL does not exist or may have been moved. Please verify the link or return to the main showcase.
           </p>
         </div>
 
         {/* CTAs */}
-        <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
           {isFromPortfolio && (
             <a
               href={portfolioUrl}
-              className="px-6 py-3 rounded-xl text-xs md:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition flex items-center justify-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Portfolio</span>
@@ -49,7 +49,7 @@ export const NotFoundView: React.FC<NotFoundViewProps> = ({
           {onBackToDashboard && (
             <button
               onClick={onBackToDashboard}
-              className="px-6 py-3 rounded-xl text-xs md:text-sm font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl text-xs sm:text-sm font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition flex items-center justify-center gap-2"
             >
               <Home className="w-4 h-4 text-indigo-400" />
               <span>Return to ScreenCraft</span>
