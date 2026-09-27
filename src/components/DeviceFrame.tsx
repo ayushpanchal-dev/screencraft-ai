@@ -36,7 +36,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   const showGlare = config?.showGlare ?? true;
   const showShadow = config?.showShadow ?? true;
   const notchType = config?.notchType || (deviceType === 'pixel' ? 'punchhole' : 'dynamic');
-  const fitMode = config?.fitMode || 'cover';
+  const fitMode = config?.fitMode || 'contain';
   const showStatusBar = config?.showStatusBarOverlay ?? true;
 
   // Determine frame border and background colors
@@ -94,16 +94,18 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
 
           {/* Center App Logo & Name */}
           <div className="z-10 space-y-3 my-auto flex flex-col items-center">
-            <div
-              className="w-20 h-20 rounded-3xl p-3 border-2 border-slate-700/80 bg-slate-900 shadow-2xl flex items-center justify-center transform hover:scale-105 transition"
-              style={{ boxShadow: `0 10px 25px -5px ${primaryColor}40` }}
-            >
-              <img
-                src={logoUrl || '/screencraft-logo.png'}
-                alt={appName || 'App Logo'}
-                className="w-full h-full object-contain"
-              />
-            </div>
+            {logoUrl && (
+              <div
+                className="w-16 h-16 rounded-2xl p-2.5 border border-slate-700/80 bg-slate-900 shadow-xl flex items-center justify-center transform hover:scale-105 transition"
+                style={{ boxShadow: `0 10px 25px -5px ${primaryColor}40` }}
+              >
+                <img
+                  src={logoUrl}
+                  alt={appName || 'App Logo'}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
             <div className="space-y-1 max-w-[200px]">
               <h3 className="text-lg font-extrabold text-white tracking-tight truncate">
                 {appName || 'Flutter Application'}
@@ -134,9 +136,9 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
             src={resolvedSrc}
             alt={title || 'App screenshot'}
             className={`w-full h-full select-none ${
-              fitMode === 'contain'
-                ? 'object-contain p-2'
-                : 'object-cover object-top'
+              fitMode === 'cover'
+                ? 'object-cover object-top'
+                : 'object-contain max-w-full max-h-full p-1'
             }`}
             draggable={false}
             onError={() => setHasError(true)}

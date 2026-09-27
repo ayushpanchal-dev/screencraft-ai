@@ -231,7 +231,7 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
               <div className="lg:col-span-5 flex justify-center items-center">
                 <DeviceFrame
                   imageSrc={currentActiveScreen ? getScreenImageUrl(currentActiveScreen) : ''}
-                  title={currentActiveScreen ? currentActiveScreen.title : `${project.name} Splash`}
+                  title={currentActiveScreen ? currentActiveScreen.title : undefined}
                   config={project.deviceConfig}
                   scale={0.9}
                   logoUrl={project.logoUrl}

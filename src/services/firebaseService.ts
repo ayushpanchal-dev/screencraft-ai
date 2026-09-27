@@ -74,27 +74,16 @@ export class FirebaseService {
 
     try {
       const colRef = collection(db, PROJECTS_COLLECTION);
-      const q = query(colRef, orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await getDocs(colRef);
       const projects: Project[] = [];
       querySnapshot.forEach((docSnap) => {
         projects.push(mapDocToProject(docSnap));
       });
+      projects.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       return projects;
     } catch (err) {
-      console.warn('Error fetching projects from Firestore, falling back to local data:', err);
-      try {
-        const colRef = collection(db, PROJECTS_COLLECTION);
-        const querySnapshot = await getDocs(colRef);
-        const projects: Project[] = [];
-        querySnapshot.forEach((docSnap) => {
-          projects.push(mapDocToProject(docSnap));
-        });
-        return projects;
-      } catch (fallbackErr) {
-        console.warn('Firestore fallback query failed:', fallbackErr);
-        return StorageService.getProjects();
-      }
+      console.warn('Error fetching projects from Firestore, falling back to local storage:', err);
+      return StorageService.getProjects();
     }
   }
 
