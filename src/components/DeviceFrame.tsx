@@ -4,11 +4,16 @@ import { getRenderableImageUrl } from '../utils/imageUrlUtils';
 import { AlertCircle, Image as ImageIcon } from 'lucide-react';
 
 interface DeviceFrameProps {
-  imageSrc: string;
+  imageSrc?: string;
   title?: string;
   config?: Partial<DeviceConfig>;
   className?: string;
   scale?: number;
+  logoUrl?: string;
+  appName?: string;
+  tagline?: string;
+  primaryColor?: string;
+  isSplashMode?: boolean;
 }
 
 export const DeviceFrame: React.FC<DeviceFrameProps> = ({
@@ -17,15 +22,22 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   config,
   className = '',
   scale = 1,
+  logoUrl,
+  appName,
+  tagline,
+  primaryColor = '#6366F1',
+  isSplashMode = false,
 }) => {
   const [hasError, setHasError] = useState(false);
-  const resolvedSrc = getRenderableImageUrl(imageSrc);
+  const resolvedSrc = imageSrc ? getRenderableImageUrl(imageSrc) : '';
 
   const deviceType = config?.deviceType || 'iphone';
   const color = config?.color || 'titanium';
   const showGlare = config?.showGlare ?? true;
   const showShadow = config?.showShadow ?? true;
   const notchType = config?.notchType || (deviceType === 'pixel' ? 'punchhole' : 'dynamic');
+  const fitMode = config?.fitMode || 'cover';
+  const showStatusBar = config?.showStatusBarOverlay ?? true;
 
   // Determine frame border and background colors
   let frameBorderColor = 'border-slate-800 bg-slate-900';
@@ -60,6 +72,89 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   const scaledWidth = Math.round(baseWidth * scale);
   const scaledHeight = Math.round(baseHeight * scale);
 
+  const renderContent = () => {
+    // If explicitly splash mode or no image provided, render App/Flutter Splash Screen
+    if (isSplashMode || (!resolvedSrc && !hasError)) {
+      return (
+        <div className="w-full h-full bg-slate-950 relative flex flex-col items-center justify-between p-6 pt-12 pb-10 text-center overflow-hidden select-none">
+          {/* Ambient radial glow */}
+          <div
+            className="absolute inset-0 opacity-25 blur-2xl pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${primaryColor} 0%, rgba(15,23,42,0.9) 80%)`,
+            }}
+          />
+
+          {/* Top Brand Tag */}
+          <div className="z-10 pt-2">
+            <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-900/80 text-indigo-300 border border-indigo-500/30">
+              Flutter Application
+            </span>
+          </div>
+
+          {/* Center App Logo & Name */}
+          <div className="z-10 space-y-3 my-auto flex flex-col items-center">
+            <div
+              className="w-20 h-20 rounded-3xl p-3 border-2 border-slate-700/80 bg-slate-900 shadow-2xl flex items-center justify-center transform hover:scale-105 transition"
+              style={{ boxShadow: `0 10px 25px -5px ${primaryColor}40` }}
+            >
+              <img
+                src={logoUrl || '/screencraft-logo.png'}
+                alt={appName || 'App Logo'}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="space-y-1 max-w-[200px]">
+              <h3 className="text-lg font-extrabold text-white tracking-tight truncate">
+                {appName || 'Flutter Application'}
+              </h3>
+              {tagline && (
+                <p className="text-[11px] text-slate-400 line-clamp-2 leading-tight">
+                  {tagline}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Bottom Official Flutter Badge */}
+          <div className="z-10 pt-2 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-400 bg-slate-900/90 px-3 py-1.5 rounded-full border border-slate-800">
+            <svg className="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14.314 0L2.3 12 6.557 16.257 22.828 0h-8.514zM14.314 11.429L9.143 16.6 14.314 21.771h8.514l-5.171-5.171 5.171-5.171h-8.514z" />
+            </svg>
+            <span>Built with Flutter</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (resolvedSrc && !hasError) {
+      return (
+        <div className="w-full h-full relative flex items-center justify-center overflow-hidden bg-slate-950">
+          <img
+            src={resolvedSrc}
+            alt={title || 'App screenshot'}
+            className={`w-full h-full select-none ${
+              fitMode === 'contain'
+                ? 'object-contain p-2'
+                : 'object-cover object-top'
+            }`}
+            draggable={false}
+            onError={() => setHasError(true)}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-6 text-center text-slate-500 space-y-2 flex flex-col items-center justify-center h-full">
+        <AlertCircle className="w-8 h-8 text-amber-500/80 mx-auto" />
+        <p className="text-[11px] text-slate-400 font-medium leading-tight">
+          Image could not be loaded. Ensure the URL is valid and set to public.
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className={`relative flex flex-col items-center justify-center max-w-full ${className}`}>
       <div
@@ -79,7 +174,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
             <div
               className="absolute inset-0 rounded-[48px] blur-2xl opacity-40 pointer-events-none"
               style={{
-                background: 'radial-gradient(circle, rgba(99,102,241,0.4) 0%, rgba(0,0,0,0.8) 100%)',
+                background: `radial-gradient(circle, ${primaryColor}66 0%, rgba(0,0,0,0.8) 100%)`,
                 transform: 'translateY(16px) scale(0.95)',
               }}
             />
@@ -103,7 +198,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
             <div className="absolute -right-[3px] top-[150px] w-[3px] h-[60px] bg-zinc-700 rounded-r" />
 
             {/* Inner Screen Display Box */}
-            <div className={`relative w-full h-full bg-black overflow-hidden ${borderRadius} border border-black`}>
+            <div className={`relative w-full h-full bg-slate-950 overflow-hidden ${borderRadius} border border-black`}>
               {/* Front Camera Cutout / Notch / Island Styles */}
               {notchType === 'dynamic' && (
                 <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[90px] h-[22px] bg-black rounded-full z-30 flex items-center justify-between px-2.5 shadow-md">
@@ -132,44 +227,35 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
               )}
 
               {/* Status Bar */}
-              <div className="absolute top-0 inset-x-0 h-8 z-20 flex justify-between items-center px-6 text-[10px] font-semibold text-white/90 pointer-events-none">
-                <span>9:41</span>
-                <div className="flex items-center gap-1.5">
-                  <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 20.3c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l2.7-2.7C10.02 19.61 11 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z" />
-                  </svg>
-                  <div className="w-4 h-2 border border-white/80 rounded-[2px] p-[1px] flex items-center">
-                    <div className="w-full h-full bg-white rounded-[1px]" />
+              {showStatusBar && (
+                <div className="absolute top-0 inset-x-0 h-7 z-20 flex justify-between items-center px-5 text-[10px] font-semibold text-white/90 pointer-events-none">
+                  <span>9:41</span>
+                  <div className="flex items-center gap-1.5">
+                    <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 20.3c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l2.7-2.7C10.02 19.61 11 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z" />
+                    </svg>
+                    <div className="w-4 h-2 border border-white/80 rounded-[2px] p-[1px] flex items-center">
+                      <div className="w-full h-full bg-white rounded-[1px]" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Actual Screenshot Content */}
-              <div className="w-full h-full relative flex items-center justify-center">
-                {resolvedSrc && !hasError ? (
-                  <img
-                    src={resolvedSrc}
-                    alt={title || 'App screenshot'}
-                    className="w-full h-full object-cover object-top select-none"
-                    draggable={false}
-                    onError={() => setHasError(true)}
-                  />
-                ) : (
-                  <div className="p-6 text-center text-slate-500 space-y-2">
-                    <AlertCircle className="w-8 h-8 text-amber-500/80 mx-auto" />
-                    <p className="text-[11px] text-slate-400 font-medium leading-tight">
-                      Image could not be loaded. Ensure the URL is valid and set to public.
-                    </p>
-                  </div>
-                )}
+              {/* Screenshot Content Area with Notch Top Safe Area Padding Inset */}
+              <div
+                className={`w-full h-full relative ${
+                  notchType !== 'none' && !isSplashMode ? 'pt-6' : ''
+                }`}
+              >
+                {renderContent()}
 
                 {/* Screen Glass Glare Gloss Overlay */}
                 {showGlare && (
                   <div
-                    className="absolute inset-0 pointer-events-none z-10 opacity-30"
+                    className="absolute inset-0 pointer-events-none z-10 opacity-25"
                     style={{
                       background:
-                        'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%)',
+                        'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%)',
                     }}
                   />
                 )}

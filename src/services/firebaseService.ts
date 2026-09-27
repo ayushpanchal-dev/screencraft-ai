@@ -99,8 +99,7 @@ export class FirebaseService {
   }
 
   /**
-   * Fetch a public project by slug for unauthenticated visitors.
-   * Satisfies Firestore security rule constraint (where type == 'public').
+   * Fetch a project by slug or ID for any visitor (public access).
    */
   static async getPublicProjectBySlug(idOrSlug: string): Promise<Project | undefined> {
     if (!idOrSlug) return undefined;
@@ -113,34 +112,25 @@ export class FirebaseService {
     try {
       const colRef = collection(db, PROJECTS_COLLECTION);
 
-      // 1. Query by exact slug AND type == 'public' (satisfies public Firestore security rule)
-      const publicSlugQuery = query(
-        colRef,
-        where('slug', '==', cleanIdOrSlug),
-        where('type', '==', 'public'),
-        limit(1)
-      );
-      const slugSnap = await getDocs(publicSlugQuery);
+      // 1. Query by exact slug
+      const slugQuery = query(colRef, where('slug', '==', cleanIdOrSlug), limit(1));
+      const slugSnap = await getDocs(slugQuery);
       if (!slugSnap.empty) {
-        console.log('[ScreenCraft AI] Public project found via slug & type query:', cleanIdOrSlug);
+        console.log('[ScreenCraft AI] Public project found via slug query:', cleanIdOrSlug);
         return mapDocToProject(slugSnap.docs[0]);
       }
 
-      // 2. Direct doc ID lookup if it is a public project
+      // 2. Direct doc ID lookup
       const docRef = doc(db, PROJECTS_COLLECTION, idOrSlug);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        const proj = mapDocToProject(docSnap);
-        if (proj.type === 'public' || !proj.type) {
-          return proj;
-        }
+        return mapDocToProject(docSnap);
       }
 
-      // 3. Fallback: fetch all public projects and match normalized ID or slug
+      // 3. Fallback: fetch all projects and match normalized ID or slug
       const allProjects = await this.getProjects();
       const norm = cleanIdOrSlug.replace(/[^a-z0-9]/g, '');
       const match = allProjects.find((p) => {
-        if (p.type !== 'public' && p.type) return false;
         if (p.id.toLowerCase() === cleanIdOrSlug) return true;
         if (p.slug && p.slug.toLowerCase() === cleanIdOrSlug) return true;
         const pSlugNorm = p.slug?.toLowerCase().replace(/[^a-z0-9]/g, '');

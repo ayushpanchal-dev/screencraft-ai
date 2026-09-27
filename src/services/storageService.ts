@@ -137,6 +137,7 @@ export class StorageService {
       tagline: initialData?.tagline || 'Interactive Mobile Showcase & Portfolio Case Study',
       description: initialData?.description || 'A high-performance mobile application built with Flutter & Material 3.',
       category: initialData?.category || 'Productivity',
+      type: initialData?.type || 'public',
       primaryColor: initialData?.primaryColor || '#6366F1',
       secondaryColor: '#3B82F6',
       techStack: initialData?.techStack || ['Flutter', 'Dart', 'GetX', 'Material 3'],

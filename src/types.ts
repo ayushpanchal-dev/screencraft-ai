@@ -25,8 +25,10 @@ export interface DeviceConfig {
   color: 'black' | 'titanium' | 'silver' | 'purple' | 'gold';
   showGlare: boolean;
   showShadow: boolean;
-  notchType: 'dynamic' | 'small' | 'corner' | 'center' | 'notch' | 'punchhole';
+  notchType: 'dynamic' | 'small' | 'corner' | 'center' | 'notch' | 'punchhole' | 'none';
   theme: 'dark' | 'light';
+  fitMode?: 'cover' | 'contain';
+  showStatusBarOverlay?: boolean;
 }
 
 export interface DevelopmentMilestone {

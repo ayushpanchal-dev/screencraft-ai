@@ -150,78 +150,104 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
         <section className="relative pt-8 sm:pt-16 pb-12 sm:pb-20 px-4 sm:px-6 overflow-hidden">
           {/* Subtle radial ambient light */}
           <div
-            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] rounded-full opacity-20 blur-3xl pointer-events-none"
+            className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] sm:w-[700px] h-[450px] sm:h-[700px] rounded-full opacity-20 blur-3xl pointer-events-none"
             style={{ backgroundColor: primaryColor }}
           />
 
-          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
-            {/* Left Hero Content */}
-            <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] sm:text-xs font-medium text-slate-300">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                <span className="truncate">Mobile App Case Study & Interactive Showcase</span>
-              </div>
+          <div className="max-w-7xl mx-auto bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 sm:p-10 md:p-12 shadow-2xl backdrop-blur-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              {/* Left Hero Content */}
+              <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-left">
+                {/* App Logo & Flutter Branding Header Box */}
+                <div className="flex flex-wrap items-center gap-3 pb-2">
+                  {project.logoUrl && (
+                    <div className="w-12 h-12 rounded-2xl p-2 bg-slate-900 border border-slate-800 shadow-lg flex items-center justify-center shrink-0">
+                      <img
+                        src={project.logoUrl}
+                        alt={project.name}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
 
-              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight break-words">
-                {showcase.heroTitle || project.name}
-              </h1>
-
-              <p className="text-sm sm:text-lg md:text-xl text-slate-400 leading-relaxed max-w-2xl">
-                {showcase.heroTagline || project.tagline || project.description}
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                {links.githubUrl && (
-                  <a
-                    href={links.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xl hover:shadow-2xl transition hover:-translate-y-0.5"
-                    style={{ backgroundColor: primaryColor }}
-                  >
-                    <Github className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                    <span>View Source Code</span>
-                  </a>
-                )}
-              </div>
-
-              {/* Tech Stack Pills */}
-              <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="text-xs text-slate-500 font-medium mr-1">Built with:</span>
-                {project.techStack.map((tech, idx) => (
-                  <span
-                    key={`${tech}-${idx}`}
-                    className="text-[11px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md bg-slate-900/90 text-slate-300 border border-slate-800 font-mono"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Right Hero Device Frame */}
-            <div className="lg:col-span-5 flex justify-center items-center">
-              {currentActiveScreen ? (
-                <DeviceFrame
-                  imageSrc={getScreenImageUrl(currentActiveScreen)}
-                  title={currentActiveScreen.title}
-                  config={project.deviceConfig}
-                  scale={0.85}
-                />
-              ) : (
-                <div className="w-[260px] h-[480px] sm:w-[280px] sm:h-[540px] rounded-[40px] bg-slate-900 border-2 border-slate-800 flex flex-col items-center justify-center p-6 text-center text-slate-500">
-                  <Smartphone className="w-12 h-12 mb-3 opacity-40" />
-                  <p className="text-sm">No screens uploaded yet</p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-950/80 border border-slate-800 text-[11px] sm:text-xs font-medium text-slate-300 shadow-sm">
+                    <svg className="w-4 h-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14.314 0L2.3 12 6.557 16.257 22.828 0h-8.514zM14.314 11.429L9.143 16.6 14.314 21.771h8.514l-5.171-5.171 5.171-5.171h-8.514z" />
+                    </svg>
+                    <span>Flutter Mobile App Showcase</span>
+                  </div>
                 </div>
-              )}
+
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight break-words">
+                  {showcase.heroTitle || project.name}
+                </h1>
+
+                <p className="text-sm sm:text-lg md:text-xl text-slate-300 leading-relaxed max-w-3xl">
+                  {showcase.heroTagline || project.tagline || project.description}
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  {links.githubUrl && (
+                    <a
+                      href={links.githubUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-xl hover:shadow-2xl transition hover:-translate-y-0.5"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      <Github className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                      <span>View Source Code</span>
+                    </a>
+                  )}
+                  {links.apkUrl && (
+                    <a
+                      href={links.apkUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold text-slate-200 bg-slate-950 hover:bg-slate-800 border border-slate-800 shadow-md transition"
+                    >
+                      <Download className="w-4 h-4 text-indigo-400" />
+                      <span>Download APK</span>
+                    </a>
+                  )}
+                </div>
+
+                {/* Tech Stack Pills */}
+                <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <span className="text-xs text-slate-500 font-medium mr-1">Built with:</span>
+                  {project.techStack.map((tech, idx) => (
+                    <span
+                      key={`${tech}-${idx}`}
+                      className="text-[11px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md bg-slate-950 text-slate-300 border border-slate-800 font-mono"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Hero Device Frame with App Splash Fallback */}
+              <div className="lg:col-span-5 flex justify-center items-center">
+                <DeviceFrame
+                  imageSrc={currentActiveScreen ? getScreenImageUrl(currentActiveScreen) : ''}
+                  title={currentActiveScreen ? currentActiveScreen.title : `${project.name} Splash`}
+                  config={project.deviceConfig}
+                  scale={0.9}
+                  logoUrl={project.logoUrl}
+                  appName={project.name}
+                  tagline={project.tagline}
+                  primaryColor={primaryColor}
+                  isSplashMode={!currentActiveScreen}
+                />
+              </div>
             </div>
           </div>
         </section>
 
         {/* Overview & Architecture Section */}
         <section className="py-10 sm:py-16 px-4 sm:px-6 border-t border-slate-900 bg-slate-950/50">
-          <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+          <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
             <div className="text-center space-y-2 sm:space-y-3">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white">Project Overview</h2>
               <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto">
@@ -250,66 +276,106 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
         </section>
 
         {/* Interactive Screenshot Carousel / Showcase */}
-        {screens.length > 0 && (
-          <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-slate-900 bg-slate-900/30">
-            <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12">
-              <div className="text-center space-y-2 sm:space-y-3">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
-                  Interactive Screen Showcase
-                </h2>
-                <p className="text-slate-400 text-xs sm:text-base max-w-xl mx-auto">
-                  Explore mobile user interfaces, screen titles, and feature callouts.
-                </p>
-              </div>
+        <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-slate-900 bg-slate-900/30">
+          <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12">
+            <div className="text-center space-y-2 sm:space-y-3">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+                Interactive Screen Showcase
+              </h2>
+              <p className="text-slate-400 text-xs sm:text-base max-w-xl mx-auto">
+                Explore mobile user interfaces, screen titles, and feature callouts.
+              </p>
+            </div>
 
-              {/* Screen Selector Tabs */}
-              <div className="flex justify-start md:justify-center items-center gap-2 overflow-x-auto pb-3 px-1 scrollbar-none">
-                {screens.map((scr, idx) => (
-                  <button
-                    key={scr.id || `scr-${idx}`}
-                    onClick={() => setActiveScreenIndex(idx)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 border whitespace-nowrap shrink-0 ${
-                      activeScreenIndex === idx
-                        ? 'bg-slate-800 text-white border-indigo-500 shadow-md'
-                        : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:text-slate-200'
-                    }`}
-                  >
-                    <span className="w-5 h-5 rounded-full bg-slate-700/80 text-[10px] flex items-center justify-center font-bold">
-                      {idx + 1}
-                    </span>
-                    <span>{scr.title || `Screen ${idx + 1}`}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Selected Screen Spotlight View */}
-              <div className="bg-slate-900/90 rounded-3xl border border-slate-800 p-5 sm:p-8 md:p-12 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center shadow-2xl">
-                {/* Left Mockup Display */}
-                <div className="md:col-span-6 flex items-center justify-center">
-                  <DeviceFrame
-                    imageSrc={getScreenImageUrl(currentActiveScreen)}
-                    title={currentActiveScreen.title}
-                    config={project.deviceConfig}
-                    scale={0.88}
-                  />
+            {/* Screen Selector Tabs with App Splash Option */}
+            <div className="flex justify-start md:justify-center items-center gap-2 overflow-x-auto pb-3 px-1 scrollbar-none">
+              {/* App Splash / Icon Tab */}
+              <button
+                type="button"
+                onClick={() => setActiveScreenIndex(-1)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 border whitespace-nowrap shrink-0 ${
+                  activeScreenIndex === -1
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-md'
+                    : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:text-slate-200'
+                }`}
+              >
+                <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
+                  <Smartphone className="w-3 h-3" />
                 </div>
+                <span>App Splash & Logo</span>
+              </button>
 
-                {/* Right Screen Detail Card */}
-                <div className="md:col-span-6 space-y-4 sm:space-y-6 text-left">
-                  <div className="inline-block px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
-                    {currentActiveScreen.category || 'Screen Focus'}
-                  </div>
+              {screens.map((scr, idx) => (
+                <button
+                  key={scr.id || `scr-${idx}`}
+                  type="button"
+                  onClick={() => setActiveScreenIndex(idx)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 border whitespace-nowrap shrink-0 ${
+                    activeScreenIndex === idx
+                      ? 'bg-slate-800 text-white border-indigo-500 shadow-md'
+                      : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  <span className="w-5 h-5 rounded-full bg-slate-700/80 text-[10px] flex items-center justify-center font-bold">
+                    {idx + 1}
+                  </span>
+                  <span>{scr.title || `Screen ${idx + 1}`}</span>
+                </button>
+              ))}
+            </div>
 
-                  <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                    {currentActiveScreen.title}
-                  </h3>
+            {/* Selected Screen Spotlight View */}
+            <div className="bg-slate-900/90 rounded-3xl border border-slate-800 p-5 sm:p-8 md:p-12 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center shadow-2xl">
+              {/* Left Mockup Display */}
+              <div className="md:col-span-6 flex items-center justify-center">
+                <DeviceFrame
+                  imageSrc={activeScreenIndex >= 0 && currentActiveScreen ? getScreenImageUrl(currentActiveScreen) : ''}
+                  title={activeScreenIndex >= 0 && currentActiveScreen ? currentActiveScreen.title : `${project.name} Logo Splash`}
+                  config={project.deviceConfig}
+                  scale={0.88}
+                  logoUrl={project.logoUrl}
+                  appName={project.name}
+                  tagline={project.tagline}
+                  primaryColor={primaryColor}
+                  isSplashMode={activeScreenIndex === -1 || !currentActiveScreen}
+                />
+              </div>
 
-                  <p className="text-slate-300 leading-relaxed text-base">
-                    {currentActiveScreen.description || 'Interactive mobile interface designed with Material 3 components.'}
-                  </p>
+              {/* Right Screen Detail Card */}
+              <div className="md:col-span-6 space-y-4 sm:space-y-6 text-left">
+                {activeScreenIndex === -1 || !currentActiveScreen ? (
+                  <>
+                    <div className="inline-block px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
+                      Application Branding & Splash
+                    </div>
+
+                    <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                      {project.name}
+                    </h3>
+
+                    <p className="text-slate-300 leading-relaxed text-sm sm:text-base">
+                      {project.tagline || project.description}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="inline-block px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
+                      {currentActiveScreen.category || 'Screen Focus'}
+                    </div>
+
+                    <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                      {currentActiveScreen.title}
+                    </h3>
+
+                    <p className="text-slate-300 leading-relaxed text-sm sm:text-base">
+                      {currentActiveScreen.description || 'Interactive mobile interface designed with Material 3 components.'}
+                    </p>
+                  </>
+                )}
 
                   {/* AI Extracted Feature Bullets if available */}
-                  {currentActiveScreen.aiExtractedFeatures &&
+                  {currentActiveScreen &&
+                    currentActiveScreen.aiExtractedFeatures &&
                     currentActiveScreen.aiExtractedFeatures.length > 0 && (
                       <div className="space-y-3 pt-2">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -360,7 +426,6 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
               </div>
             </div>
           </section>
-        )}
 
         {/* Feature Highlights Grid */}
         {showcase.features && showcase.features.length > 0 && (
